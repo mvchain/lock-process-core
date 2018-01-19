@@ -1,0 +1,99 @@
+logging:
+    level:
+#        tk.mybatis: DEBUG
+        com.mvc.admin: DEBUG
+spring:
+    application:
+        name: mvc-user
+    jackson:
+        date-format: yyyy-MM-dd HH:mm:ss
+        time-zone: GMT+8
+        default-property-inclusion: non_null
+    redis:
+        database: 1
+        host: localhost
+        pool:
+            max-active: 20
+    datasource:
+        name: test
+        url: jdbc:mysql://localhost:3306/mvc-user?useUnicode=true&characterEncoding=UTF8
+        username: mvc
+        password: mvc123$%^
+        # 使用druid数据源
+        type: com.alibaba.druid.pool.DruidDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        filters: stat
+        maxActive: 20
+        initialSize: 1
+        maxWait: 60000
+        minIdle: 1
+        timeBetweenEvictionRunsMillis: 60000
+        minEvictableIdleTimeMillis: 300000
+        validationQuery: select 'x'
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        poolPreparedStatements: true
+        maxOpenPreparedStatements: 20
+    rabbitmq:
+        host: localhost
+        port: 5672
+        username: admin
+        password: admin
+mybatis:
+    basepackage: com.mvc.user.mapper
+    xmlLocation: classpath:mapper/**/*.xml
+
+server:
+    port: 8763
+
+eureka:
+    instance:
+        statusPageUrlPath: /info
+        healthCheckUrlPath: /health
+        # docker 部署开启
+#        prefer-ip-address: true
+#        ip-address: 127.0.0.1
+    client:
+        serviceUrl:
+#            defaultZone: http://localhost:8761/eureka/
+                    # docker 部署开启
+            defaultZone: http://${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/
+
+swagger:
+    basepackage: com.mvc.user
+    service:
+        name: Admin Back
+        description: Admin Back后端服务
+        developer: 老A
+
+
+auth:
+  serviceId: mvc-auth
+  user:
+    token-header: Authorization
+  client:
+    id: mvc-user
+    secret: 123456
+    token-header: client-token
+
+feign:
+  hystrix:
+    enabled: false
+#redis-cache 相关
+#redis:
+#    pool:
+#         maxActive: 300
+#         maxIdle: 100
+#         maxWait: 1000
+#    host: localhost
+#    port: 6379
+#    password:
+#    timeout: 2000
+#    # 服务或应用名
+#    sysName: mvc-user
+#    enable: true
+#    database: 0
+
+spring.session.store-type: redis
+ethnum.key: mvc123$%^
