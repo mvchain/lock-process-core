@@ -16,23 +16,17 @@ import java.util.Random;
  *  
  */  
 public class VerifyUtil {  
-    // 验证码字符集    
         private static final char[] CHARS = {
             '2', '3', '4', '5', '6', '7', '8', '9',
             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'm', 'n',
             'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N',
             'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
-        // 字符数量    
-        private static final int SIZE = 4;    
-        // 干扰线数量    
-        private static final int LINES = 5;    
-        // 宽度    
-        private static final int WIDTH = 80;    
-        // 高度    
-        private static final int HEIGHT = 40;    
-        // 字体大小    
-        private static final int FONT_SIZE = 30;    
+        private static final int SIZE = 4;
+        private static final int LINES = 5;
+        private static final int WIDTH = 80;
+        private static final int HEIGHT = 40;
+        private static final int FONT_SIZE = 27;
   
         /**  
          * 生成随机验证码及图片  
@@ -62,7 +56,7 @@ public class VerifyUtil {
                         null, Font.BOLD + Font.ITALIC, FONT_SIZE));    
                 // 画字符    
                 graphic.drawString(    
-                        CHARS[n] + "", i * WIDTH / SIZE, HEIGHT*2/3);    
+                        CHARS[n] + "", i * WIDTH / SIZE * 19 / 20, HEIGHT*2/3);
                 // 记录字符    
                 sb.append(CHARS[n]);    
             }    

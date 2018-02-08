@@ -15,7 +15,6 @@ public class TransactionDTO {
 
     private Integer pageNo;
     private Integer pageSize;
-    //0充值 1提现 2手动提现
     private String types;
     private BigInteger userId;
 }

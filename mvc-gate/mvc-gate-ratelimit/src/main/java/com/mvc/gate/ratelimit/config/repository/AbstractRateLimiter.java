@@ -17,7 +17,19 @@ import static java.util.concurrent.TimeUnit.SECONDS;
  */
 public abstract class AbstractRateLimiter implements RateLimiter {
 
+    /**
+     * getRate
+     *
+     * @param key
+     * @return
+     */
     protected abstract Rate getRate(String key);
+
+    /**
+     * saveRate
+     *
+     * @param rate
+     */
     protected abstract void saveRate(Rate rate);
 
     @Override

@@ -53,7 +53,7 @@ public class DbLog extends Thread {
 
     @Override
     public void run() {
-        List<LogInfo> bufferedLogList = new ArrayList<LogInfo>(); // 缓冲队列
+        List<LogInfo> bufferedLogList = new ArrayList<>();
         while (true) {
             try {
                 bufferedLogList.add(logInfoQueue.take());

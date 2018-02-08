@@ -3,8 +3,14 @@ package com.mvc.gate.ratelimit.config;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Created by ace on 2017/9/23.
+ * @author qyc
  */
 public interface IUserPrincipal {
+    /**
+     * getName
+     *
+     * @param request
+     * @return
+     */
     String getName(HttpServletRequest request);
 }

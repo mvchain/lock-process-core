@@ -1,7 +1,6 @@
 package com.mvc.ethereum.service;
 
 import com.alibaba.fastjson.JSONObject;
-import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.mvc.common.biz.BaseBiz;
@@ -9,14 +8,16 @@ import com.mvc.common.constant.CommonConstants;
 import com.mvc.common.context.BaseContextHandler;
 import com.mvc.common.dto.TransactionDTO;
 import com.mvc.ethereum.configuration.WalletConfig;
+import com.mvc.ethereum.constant.EthConstants;
 import com.mvc.ethereum.mapper.CapitalMapper;
 import com.mvc.ethereum.mapper.TransactionMapper;
+import com.mvc.ethereum.model.LockRecord;
 import com.mvc.ethereum.model.Transaction;
 import com.mvc.ethereum.model.vo.*;
 import com.mvc.ethereum.utils.CoinUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,9 +28,10 @@ import org.web3j.abi.datatypes.Address;
 import org.web3j.abi.datatypes.Function;
 import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.generated.Uint256;
-import org.web3j.crypto.WalletUtils;
+import org.web3j.protocol.Web3j;
 import org.web3j.protocol.admin.Admin;
 import org.web3j.protocol.admin.methods.response.PersonalUnlockAccount;
+import org.web3j.protocol.core.methods.response.EthEstimateGas;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 import org.web3j.protocol.core.methods.response.Log;
 import org.web3j.quorum.Quorum;
@@ -40,7 +42,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 import static org.web3j.tx.Contract.GAS_LIMIT;
@@ -69,8 +70,15 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
     private CapitalMapper capitalMapper;
     @Autowired
     private RedisTemplate redisTemplate;
+    @Autowired
+    private Web3j web3j;
+    @Autowired
+    private ContractService contractService;
+    @Value("${job.limit}")
+    private BigInteger limit;
+    @Autowired
+    private LockRecordService lockRecordService;
 
-    // 这里到时候需要通过mq来调用, 以提高速度和安全性
     public Boolean insetTransaction(Transaction transaction) {
         transactionMapper.insert(transaction);
         return true;
@@ -84,6 +92,9 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
     public void insert(org.web3j.protocol.core.methods.request.Transaction transaction, String pass, String orderId, String contractAddress) throws Exception {
         EthSendTransaction result = eth_sendTransaction(transaction, pass, contractAddress);
         Integer status = result.hasError() ? 9 : 1;
+        if (result.hasError()) {
+            log.warning("Send Transaction error: " + result.getError().getMessage());
+        }
         // 更新状态
         transactionMapper.updateByOrderId(orderId, result.getTransactionHash(), status);
     }
@@ -97,7 +108,7 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
         }
         Function function = new Function("transfer", Arrays.<Type>asList(new Address(transaction.getTo()), new Uint256(Numeric.decodeQuantity(transaction.getValue()))), Collections.<TypeReference<?>>emptyList());
         String data = FunctionEncoder.encode(function);
-        PrivateTransaction privateTransaction = new PrivateTransaction(transaction.getFrom(), null, GAS_LIMIT, contractAddress, BigInteger.ZERO, data, Arrays.asList(transaction.getFrom(), transaction.getTo(), contractAddress));
+        PrivateTransaction privateTransaction = new PrivateTransaction(transaction.getFrom(), null, GAS_LIMIT.divide(BigInteger.valueOf(30)), contractAddress, BigInteger.ZERO, data, Arrays.asList(transaction.getFrom(), transaction.getTo(), contractAddress));
         EthSendTransaction response = quorum.ethSendTransaction(privateTransaction).send();
 
         return response;
@@ -146,7 +157,7 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
         JSONObject now = transactionMapper.lockCount(coinId, unit, "0");
         JSONObject unlock = transactionMapper.lockCount(coinId, unit, "1");
         LockCount lockCount = setValue(all, now, unlock);
-        AdminBalanceVO adminBalanceVO = new AdminBalanceVO(BigInteger.ZERO, withdrawCount, depositeCount, lockCount, coinId);
+        AdminBalanceVO adminBalanceVO = new AdminBalanceVO(BigInteger.ZERO, withdrawCount, depositeCount, lockCount, coinId, null);
         return adminBalanceVO;
     }
 
@@ -175,42 +186,41 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
         Transaction transactionTemp = new Transaction();
         transactionTemp.setTxHash(hash);
         Transaction transaction = transactionMapper.selectOne(transactionTemp);
-        if (null != transaction && transaction.getStatus().equals(CommonConstants.SUCCESS) ) {
+        if (null != transaction && transaction.getStatus().equals(CommonConstants.SUCCESS)) {
             return;
         }
-        if (null == transaction) {
+        Object key = redisTemplate.opsForValue().get(BaseContextHandler.ADDR_LISTEN_ + to);
+        if (null == transaction && null != key ) {
             // 其他账户 -> 用户临时账户
             transaction = newTransfaction(tx);
             if (null != transaction.getUserId()) {
                 transactionMapper.insert(transaction);
-                // 插入成功后转移至总账户
-                org.web3j.protocol.core.methods.request.Transaction trans = null;
-                try {
-                    trans = buildTransaction(from, to, value);
-                    EthSendTransaction result = eth_sendTransaction(trans, walletConfig.getPass(tx.getAddress()), tx.getAddress());
-                    System.out.println(result);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
                 // 更新余额信息
-
-
                 capitalMapper.updateBalance(coinId, transaction.getUserId(), value.toString());
+                // add to job list if the balance if enough
+                addLimitList(to);
             }
-        } else if (walletConfig.isWalletAccount(from)) {
+        } else if (walletConfig.isWalletAccount(from) && null != transaction) {
             // 总账户 -> 其他账户
             transactionMapper.updateByHash(hash);
             if (null != transaction.getUserId()) {
                 // 更新余额信息
-                capitalMapper.updateBalance(coinId, transaction.getUserId(), BigInteger.ZERO.subtract(value).toString(10));
+                capitalMapper.updateBalance(coinId, transaction.getUserId(), BigInteger.ZERO.subtract(transaction.getActualQuantity()).toString(10));
             }
-        } else if (walletConfig.isWalletAccount(to)) {
-            // 用户临时账户 -> 总账户
-            transactionMapper.updateByHash(hash);
-            // 更新余额信息
-            capitalMapper.updateBalance(coinId, transaction.getUserId(), value.toString(10));
         }
+    }
 
+    private void addLimitList(String to) {
+        String key = CommonConstants.LIMIT_LIST;
+        String sAddress = walletConfig.getAddress().values().iterator().next();
+        BigInteger balance = contractService.balanceOf(sAddress, to);
+        // add token balance
+        BigInteger nowBalance = (BigInteger) redisTemplate.opsForValue().get(EthConstants.OTHER_BALANCE);
+        nowBalance = nowBalance == null ? BigInteger.ZERO : nowBalance;
+        redisTemplate.opsForValue().set(EthConstants.OTHER_BALANCE, nowBalance.add(balance));
+        if (balance.compareTo(limit) > 0) {
+            redisTemplate.opsForList().rightPush(key, to);
+        }
     }
 
     private Transaction newTransfaction(Log tx) {
@@ -246,12 +256,12 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
         return value;
     }
 
-    public org.web3j.protocol.core.methods.request.Transaction buildTransaction(String to, String from, BigInteger value) throws Exception {
+    public org.web3j.protocol.core.methods.request.Transaction buildTransaction(String to, String from, BigInteger value) {
         org.web3j.protocol.core.methods.request.Transaction transaction = new org.web3j.protocol.core.methods.request.Transaction(
                 from,
                 null,
-                GAS_PRICE.divide(BigInteger.valueOf(10)),
-                GAS_LIMIT.divide(BigInteger.valueOf(10)),
+                GAS_PRICE.divide(BigInteger.valueOf(100)),
+                GAS_LIMIT.divide(BigInteger.valueOf(100)),
                 to,
                 value,
                 null
@@ -259,4 +269,58 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
         return transaction;
     }
 
+    public Boolean sendToken(String addr) {
+        try {
+            String sAccount = walletConfig.getAccount().values().iterator().next();
+            String sAddress = walletConfig.getAddress().values().iterator().next();
+            String sPass = walletConfig.getPass().values().iterator().next();
+            BigInteger balance = contractService.balanceOf(sAddress, addr);
+            // get gas
+            org.web3j.protocol.core.methods.request.Transaction trans = buildTransaction(sAccount, addr, balance);
+            EthSendTransaction transResp = eth_sendTransaction(trans, sPass, sAddress);
+            if (transResp.hasError()) {
+                log.warning("send token fail:" + transResp.getError().getMessage());
+                return false;
+            }
+            // add token balance
+            BigInteger nowBalance = (BigInteger) redisTemplate.opsForValue().get(EthConstants.OTHER_BALANCE);
+            nowBalance = nowBalance == null ? BigInteger.ZERO : nowBalance;
+            redisTemplate.opsForValue().set(EthConstants.OTHER_BALANCE, nowBalance.subtract(balance));
+            return true;
+        } catch (Exception e) {
+            log.warning("send token fail:" + e.getMessage());
+            return false;
+        }
+    }
+
+    public Boolean sendGas(String addr) {
+        try {
+            String sAccount = walletConfig.getAccount().values().iterator().next();
+            String sPass = walletConfig.getPass().values().iterator().next();
+            // get gas
+            EthEstimateGas result = null;
+            BigInteger gas = EthConstants.GAS_PRICE.multiply(EthConstants.GAS_LIMIT);
+            // transfer token balance
+            org.web3j.protocol.core.methods.request.Transaction transaction = buildTransaction(addr, sAccount, gas);
+            EthSendTransaction resp = eth_sendTransaction(transaction, sPass);
+            if (resp.hasError()) {
+                log.warning("send gas fail:" + result.getError().getMessage());
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            log.warning("send gas fail:" + e.getMessage());
+            return false;
+        }
+    }
+
+    public void unlock() {
+        LockRecord lockRecord = new LockRecord();
+        List<LockRecord> list = lockRecordService.selectUnlock();
+        list.stream().forEach(lock -> {
+            lock.setStatus(1);
+            lockRecordService.update(lock);
+            capitalMapper.updateLockBalance(lock.getCoinId(), lock.getUserId(), lock.getInterest().toString(), lock.getQuantity().toString());
+        });
+    }
 }

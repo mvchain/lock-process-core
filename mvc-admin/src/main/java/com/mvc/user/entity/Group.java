@@ -2,9 +2,14 @@ package com.mvc.user.entity;
 
 import com.mvc.user.constant.AdminCommonConstant;
 
+import javax.persistence.Column;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.util.Date;
-import javax.persistence.*;
 
+/**
+ * @author qyc
+ */
 @Table(name = "base_group")
 public class Group {
     @Id

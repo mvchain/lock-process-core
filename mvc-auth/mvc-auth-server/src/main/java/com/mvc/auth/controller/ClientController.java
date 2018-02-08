@@ -22,11 +22,11 @@ import java.io.OutputStream;
 import java.util.List;
 
 /**
- * Created by ace on 2017/9/10.
+ * @author qyc
  */
 @RestController
 @RequestMapping("client")
-public class ClientController{
+public class ClientController {
     @Autowired
     private AuthClientService authClientService;
     @Autowired
@@ -42,25 +42,25 @@ public class ClientController{
         return new ObjectRestResponse<List<String>>().data(authClientService.getAllowedClient(serviceId, secret));
     }
 
-    @RequestMapping(value = "/servicePubKey",method = RequestMethod.POST)
+    @RequestMapping(value = "/servicePubKey", method = RequestMethod.POST)
     public ObjectRestResponse<byte[]> getServicePublicKey(@RequestParam("clientId") String clientId, @RequestParam("secret") String secret) throws Exception {
         authClientService.validate(clientId, secret);
         return new ObjectRestResponse<byte[]>().data(keyConfiguration.getServicePubKey());
     }
 
-    @RequestMapping(value = "/userPubKey",method = RequestMethod.POST)
+    @RequestMapping(value = "/userPubKey", method = RequestMethod.POST)
     public ObjectRestResponse<byte[]> getUserPublicKey(@RequestParam("clientId") String clientId, @RequestParam("secret") String secret) throws Exception {
         authClientService.validate(clientId, secret);
         return new ObjectRestResponse<byte[]>().data(keyConfiguration.getUserPubKey());
     }
 
     @RequestMapping(value = "/validate/image", method = RequestMethod.GET)
-    public void valicodeImage(HttpServletResponse response, HttpSession session) throws Exception{
+    public void valicodeImage(HttpServletResponse response, HttpSession session) throws Exception {
         //利用图片工具生成图片
         //第一个参数是生成的验证码，第二个参数是生成的图片
         Object[] objs = VerifyUtil.createImage();
         //将验证码存入Session
-        session.setAttribute("imageCode",objs[0]);
+        session.setAttribute("imageCode", objs[0]);
 
         //将图片输出给浏览器
         BufferedImage image = (BufferedImage) objs[1];
@@ -70,7 +70,7 @@ public class ClientController{
     }
 
     @RequestMapping(value = "/validate", method = RequestMethod.GET)
-    public BaseResponse valicode(HttpServletResponse response, HttpSession session, @RequestParam String valiCode) throws Exception{
+    public BaseResponse valicode(HttpServletResponse response, HttpSession session, @RequestParam String valiCode) throws Exception {
         boolean result = ObjectUtils.equals(String.valueOf(session.getAttribute("imageCode")), valiCode);
         Assert.isTrue(result, RestMsgConstants.VALI_IMG_ERR);
         return new BaseResponse(200, "success");

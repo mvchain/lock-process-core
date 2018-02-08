@@ -6,7 +6,7 @@ import com.mvc.ethereum.model.Method;
 import java.util.Optional;
 
 /**
- * Contract factory.
+ * @author qyc
  */
 public class VisitorFactory {
 
@@ -14,7 +14,7 @@ public class VisitorFactory {
         return Method.builder().name(name.isPresent() ? name.get() : null).args(args.isPresent() ? args.get() : null).build();
     }
 
-    public static<T> AbstractBlockchainVisitor build(final String contractAddress, final String accountAddress, final String pwd, final String name, final String content, final T model, Method method) {
+    public static <T> AbstractBlockchainVisitor build(final String contractAddress, final String accountAddress, final String pwd, final String name, final String content, final T model, Method method) {
         Account account = Account.builder().address(accountAddress).passphrase(pwd).build();
 
         AbstractBlockchainVisitor visitor = new AbstractBlockchainVisitor(method) {
@@ -32,6 +32,6 @@ public class VisitorFactory {
         visitor.setAccount(account);
         visitor.setModel(model);
         visitor.setAddress(contractAddress);
-        return  visitor;
+        return visitor;
     }
 }

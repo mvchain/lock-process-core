@@ -7,6 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+/**
+ * @author qyc
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ToString
 public abstract class AbstractBlockchainVisitor<T> {
@@ -34,8 +37,18 @@ public abstract class AbstractBlockchainVisitor<T> {
     @Getter
     private T model;
 
+    /**
+     * getContent
+     *
+     * @return
+     */
     public abstract String getContent();
 
+    /**
+     * getName
+     *
+     * @return
+     */
     public abstract String getName();
 
     public Object[] getCreateArgs() {

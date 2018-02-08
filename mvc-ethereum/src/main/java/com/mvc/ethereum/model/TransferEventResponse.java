@@ -2,6 +2,9 @@ package com.mvc.ethereum.model;
 
 import lombok.Data;
 
+/**
+ * @author qyc
+ */
 @Data
 public class TransferEventResponse {
     private String from;
@@ -13,8 +16,8 @@ public class TransferEventResponse {
 
     public TransferEventResponse(
             HumanStandardToken.TransferEventResponse transferEventResponse) {
-        this.from = transferEventResponse._from.toString();
-        this.to = transferEventResponse._to.toString();
-        this.value = transferEventResponse._value.getValue().longValueExact();
+        this.from = transferEventResponse.from.toString();
+        this.to = transferEventResponse.to.toString();
+        this.value = transferEventResponse.value.getValue().longValueExact();
     }
 }

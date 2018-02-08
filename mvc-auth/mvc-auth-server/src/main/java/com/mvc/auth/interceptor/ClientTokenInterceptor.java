@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * Created by ace on 2017/9/12.
+ * @author qyc
  */
 public class ClientTokenInterceptor implements RequestInterceptor {
     private Logger logger = LoggerFactory.getLogger(ClientTokenInterceptor.class);

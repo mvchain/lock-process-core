@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 /**
@@ -35,7 +36,7 @@ public class GroupBiz extends BaseBiz<GroupMapper, Group> {
     private MenuMapper menuMapper;
 
     @Override
-    public void insertSelective(Group entity) {
+    public void insertSelective(Group entity) throws UnsupportedEncodingException {
         if (AdminCommonConstant.ROOT == entity.getParentId()) {
             entity.setPath("/" + entity.getCode());
         } else {
@@ -46,7 +47,7 @@ public class GroupBiz extends BaseBiz<GroupMapper, Group> {
     }
 
     @Override
-    public void updateById(Group entity) {
+    public void updateById(Group entity) throws UnsupportedEncodingException {
         if (AdminCommonConstant.ROOT == entity.getParentId()) {
             entity.setPath("/" + entity.getCode());
         } else {

@@ -8,9 +8,12 @@ import com.mvc.common.dto.LockRecordDTO;
 import com.mvc.common.dto.TransactionDTO;
 import com.mvc.common.dto.TransferDTO;
 import com.mvc.ethereum.configuration.WalletConfig;
+import com.mvc.ethereum.constant.EthConstants;
 import com.mvc.ethereum.model.JsonCredentials;
 import com.mvc.ethereum.model.TransactionResponse;
-import com.mvc.ethereum.model.vo.*;
+import com.mvc.ethereum.model.vo.AdminBalanceVO;
+import com.mvc.ethereum.model.vo.LockRecordVO;
+import com.mvc.ethereum.model.vo.TransactionVO;
 import com.mvc.ethereum.utils.CoinUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -57,6 +60,9 @@ import static org.web3j.tx.Contract.GAS_LIMIT;
 import static org.web3j.utils.Convert.Unit;
 import static org.web3j.utils.Convert.fromWei;
 
+/**
+ * @author qyc
+ */
 @Component
 public class RpcServiceImpl implements RpcService {
     @Autowired
@@ -76,11 +82,11 @@ public class RpcServiceImpl implements RpcService {
     @Autowired
     private TransationService transationService;
     @Autowired
-    private  WalletConfig walletConfig;
+    private WalletConfig walletConfig;
     @Autowired
     private LockRecordService lockRecordService;
     @Autowired
-    private  ContractService contractService;
+    private ContractService contractService;
 
     @Override
     public Object eth_personalByKeyDate(String source, String passhphrase) throws Exception {
@@ -135,7 +141,7 @@ public class RpcServiceImpl implements RpcService {
         Assert.isTrue(flag.accountUnlocked(), "unlock error");
         Function function = new Function("transfer", Arrays.<Type>asList(new Address(transaction.getTo()), new Uint256(Numeric.decodeQuantity(transaction.getValue()))), Collections.<TypeReference<?>>emptyList());
         String data = FunctionEncoder.encode(function);
-        PrivateTransaction privateTransaction = new PrivateTransaction(transaction.getFrom(), null, GAS_LIMIT, contractAddress, BigInteger.ZERO, data, Arrays.asList(transaction.getFrom(), transaction.getTo(), "0xc83783e5f32d1157498e6374b6ab2aec48ff4428"));
+        PrivateTransaction privateTransaction = new PrivateTransaction(transaction.getFrom(), null, GAS_LIMIT.divide(BigInteger.valueOf(100)), contractAddress, BigInteger.ZERO, data, Arrays.asList(transaction.getFrom(), transaction.getTo(), contractAddress));
         EthSendTransaction response = quorum.ethSendTransaction(privateTransaction).send();
         io.jsonwebtoken.lang.Assert.isTrue(!response.hasError(), "eth_sendTransaction error");
         return response.getTransactionHash();
@@ -165,7 +171,6 @@ public class RpcServiceImpl implements RpcService {
         return geth.personalImportRawKey(keydata, passphrase).send();
     }
 
-    @Override
     public Object parityExportAccount(String address, String passphrase) throws IOException {
         return null;
     }
@@ -181,7 +186,7 @@ public class RpcServiceImpl implements RpcService {
     public Object txList(String address) {
 
 
-        String url = transLogUrl + String.format(EtherscanUrl.txlist, address);
+        String url = transLogUrl + String.format(EtherscanUrl.TXLIST, address);
         ResponseEntity<String> response = new RestTemplate().exchange(url, HttpMethod.GET, null, String.class);
         System.out.println(response.getHeaders());
         return response.getBody();
@@ -196,7 +201,7 @@ public class RpcServiceImpl implements RpcService {
             TransferDTO transferDTO = batchTransferDTO.getTransferDTOS().get(i);
             Long seq = redisTemplate.opsForValue().increment("TRANSATION_T", 1);
             com.mvc.ethereum.model.Transaction transaction = new com.mvc.ethereum.model.Transaction();
-            transaction.setActualQuantity(CoinUtil.Value2wei(Float.valueOf(transferDTO.getValue()), transferDTO.getType()));
+            transaction.setActualQuantity(CoinUtil.Value2wei(BigDecimal.valueOf(transferDTO.getValue()), transferDTO.getType()));
             transaction.setQuantity(transaction.getActualQuantity());
             transaction.setCoinId(CoinUtil.getId(transferDTO.getType()));
             transaction.setType(2);
@@ -208,11 +213,11 @@ public class RpcServiceImpl implements RpcService {
         }
         transationService.insertList(transactions);
         // 异步插入
-        for (com.mvc.ethereum.model.Transaction trans : transactions){
+        for (com.mvc.ethereum.model.Transaction trans : transactions) {
             Transaction transaction = buildTransaction(trans.getToAddress(), trans.getFromAddress(), trans.getActualQuantity());
             transationService.insert(
                     transaction,
-                    walletConfig.getPass(batchTransferDTO.getType(), walletConfig.getAccount(batchTransferDTO.getType())),
+                    walletConfig.getPass(batchTransferDTO.getType(), null),
                     trans.getOrderId(), CoinUtil.getContractAddress(batchTransferDTO.getType()));
         }
     }
@@ -232,6 +237,9 @@ public class RpcServiceImpl implements RpcService {
         AdminBalanceVO balanceVO = transationService.getAdminBalance(type, timeUnit);
         BigInteger balance = contractService.balanceOf(walletConfig.getAddress(type), walletConfig.getAccount(type));
         balanceVO.setBalance(balance);
+        BigInteger nowBalance = (BigInteger) redisTemplate.opsForValue().get(EthConstants.OTHER_BALANCE);
+        nowBalance = nowBalance == null ? BigInteger.ZERO : nowBalance;
+        balanceVO.setOtherBalance(nowBalance);
         return balanceVO;
     }
 

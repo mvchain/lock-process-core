@@ -14,8 +14,15 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @author wanghaobin
  * @create 2017-06-21 8:11
  */
-@FeignClient(value = "mvc-admin",configuration = FeignConfiguration.class)
+@FeignClient(value = "mvc-admin", configuration = FeignConfiguration.class)
 public interface IUserService {
-  @RequestMapping(value = "/api/user/validate", method = RequestMethod.POST)
-  public UserInfo validate(@RequestParam("username") String username, @RequestParam("password") String password);
+    /**
+     * validate
+     *
+     * @param username
+     * @param password
+     * @return
+     */
+    @RequestMapping(value = "/api/user/validate", method = RequestMethod.POST)
+    public UserInfo validate(@RequestParam("username") String username, @RequestParam("password") String password);
 }

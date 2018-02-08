@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Ace on 2017/6/12.
+ * @author qyc
  */
 public class TreeNode {
     protected int id;
@@ -36,7 +36,7 @@ public class TreeNode {
         this.parentId = parentId;
     }
 
-    public void add(TreeNode node){
+    public void add(TreeNode node) {
         children.add(node);
     }
 }

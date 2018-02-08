@@ -5,6 +5,9 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import java.util.Date;
 
+/**
+ * @author qyc
+ */
 @Table(name = "auth_client_service")
 public class ClientService {
     @Id

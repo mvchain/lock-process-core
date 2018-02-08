@@ -1,7 +1,7 @@
 package com.mvc.common.exception;
 
 /**
- * Created by ace on 2017/9/8.
+ * @author qyc
  */
 public class BaseException extends RuntimeException {
     private int status = 200;
@@ -17,7 +17,7 @@ public class BaseException extends RuntimeException {
     public BaseException() {
     }
 
-    public BaseException(String message,int status) {
+    public BaseException(String message, int status) {
         super(message);
         this.status = status;
     }

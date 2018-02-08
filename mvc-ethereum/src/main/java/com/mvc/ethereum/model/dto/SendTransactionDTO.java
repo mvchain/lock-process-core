@@ -5,6 +5,9 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
+/**
+ * @author qyc
+ */
 @Data
 public class SendTransactionDTO {
 

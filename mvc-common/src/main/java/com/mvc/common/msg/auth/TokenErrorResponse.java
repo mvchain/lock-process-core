@@ -4,7 +4,7 @@ import com.mvc.common.constant.RestCodeConstants;
 import com.mvc.common.msg.BaseResponse;
 
 /**
- * Created by ace on 2017/8/23.
+ * @author qyc
  */
 public class TokenErrorResponse extends BaseResponse {
     public TokenErrorResponse(String message) {

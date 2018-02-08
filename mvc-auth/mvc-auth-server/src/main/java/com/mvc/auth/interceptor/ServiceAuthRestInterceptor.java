@@ -1,6 +1,6 @@
 package com.mvc.auth.interceptor;
 
-import com.mvc.auth.common.util.jwt.IJwtInfo;
+import com.mvc.auth.common.util.jwt.IJWTInfo;
 import com.mvc.auth.configuration.ClientConfiguration;
 import com.mvc.auth.service.AuthClientService;
 import com.mvc.auth.util.client.ClientTokenUtil;
@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Created by ace on 2017/9/12.
+ * @author qyc
  */
 @SuppressWarnings("ALL")
 public class ServiceAuthRestInterceptor extends HandlerInterceptorAdapter {
@@ -27,14 +27,15 @@ public class ServiceAuthRestInterceptor extends HandlerInterceptorAdapter {
     private AuthClientService authClientService;
     @Autowired
     private ClientConfiguration clientConfiguration;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         HandlerMethod handlerMethod = (HandlerMethod) handler;
         String token = request.getHeader(clientConfiguration.getClientTokenHeader());
-        IJwtInfo infoFromToken = clientTokenUtil.getInfoFromToken(token);
+        IJWTInfo infoFromToken = clientTokenUtil.getInfoFromToken(token);
         String uniqueName = infoFromToken.getUniqueName();
-        for(String client: authClientService.getAllowedClient(clientConfiguration.getClientId())){
-            if(client.equals(uniqueName)){
+        for (String client : authClientService.getAllowedClient(clientConfiguration.getClientId())) {
+            if (client.equals(uniqueName)) {
                 return super.preHandle(request, response, handler);
             }
         }

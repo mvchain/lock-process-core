@@ -5,6 +5,9 @@ import lombok.Data;
 import java.io.Serializable;
 import java.math.BigInteger;
 
+/**
+ * @author qyc
+ */
 @Data
 public class JwtUserAuthenticationRequest implements Serializable {
 

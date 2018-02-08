@@ -15,7 +15,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @FeignClient("mvc-auth")
 public interface AuthService {
-
+    /**
+     * createAuthenticationToken
+     *
+     * @param authenticationRequest
+     * @return
+     */
     @RequestMapping(value = "jwt/token", method = RequestMethod.POST)
     public ResponseEntity<JSONObject> createAuthenticationToken(
             @RequestBody JwtAuthenticationRequest authenticationRequest);

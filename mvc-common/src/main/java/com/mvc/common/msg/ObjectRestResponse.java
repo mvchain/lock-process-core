@@ -1,7 +1,7 @@
 package com.mvc.common.msg;
 
 /**
- * Created by Ace on 2017/6/11.
+ * @author qyc
  */
 public class ObjectRestResponse<T> extends BaseResponse {
 
@@ -27,6 +27,7 @@ public class ObjectRestResponse<T> extends BaseResponse {
         this.setData(data);
         return this;
     }
+
     public T getData() {
         return data;
     }

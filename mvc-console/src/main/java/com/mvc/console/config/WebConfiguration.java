@@ -3,8 +3,8 @@ package com.mvc.console.config;
 import com.mvc.auth.client.interceptor.ServiceAuthRestInterceptor;
 import com.mvc.auth.client.interceptor.UserAuthRestInterceptor;
 import com.mvc.common.handler.GlobalExceptionHandler;
-import com.mvc.console.service.ConfigService;
 import com.mvc.console.mapper.CoinInfoMapper;
+import com.mvc.console.service.ConfigService;
 import com.mvc.console.util.CoinUtil;
 import com.mvc.console.util.ConfigUtil;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * Created by ace on 2017/9/8.
+ * @author qyc
  */
 @Configuration("admimWebConfig")
 @Primary
@@ -58,7 +58,7 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
     }
 
     @Bean
-    public CoinUtil coinUtil(CoinInfoMapper coinInfoMapper){
+    public CoinUtil coinUtil(CoinInfoMapper coinInfoMapper) {
         coinInfoMapper.selectAll().stream().forEach(obj -> {
             CoinUtil.coinMap.put(obj.getId(), obj);
         });
@@ -66,7 +66,7 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
     }
 
     @Bean
-    public ConfigUtil configUtil(ConfigService configService){
+    public ConfigUtil configUtil(ConfigService configService) {
         configService.updateConfig();
         return new ConfigUtil();
     }

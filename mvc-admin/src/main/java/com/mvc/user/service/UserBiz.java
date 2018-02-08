@@ -12,6 +12,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.UnsupportedEncodingException;
+
 /**
  * @author qyc
  * @create 2017-06-08 16:23
@@ -24,7 +26,7 @@ public class UserBiz extends BaseBiz<UserMapper, User> {
     private UserMapper userMapper;
 
     @Override
-    public void insertSelective(User entity) {
+    public void insertSelective(User entity) throws UnsupportedEncodingException {
         String password = new BCryptPasswordEncoder(UserConstant.PW_ENCORDER_SALT).encode(entity.getPassword());
         entity.setPassword(password);
         super.insertSelective(entity);

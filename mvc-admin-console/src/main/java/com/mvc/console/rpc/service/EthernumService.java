@@ -5,10 +5,17 @@ import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+/**
+ * @author qyc
+ */
 @FeignClient("mvc-etherenum")
 public interface EthernumService {
-
-    @RequestMapping(value="/api/log/save",method = RequestMethod.POST)
+    /**
+     * saveLog
+     *
+     * @param info
+     */
+    @RequestMapping(value = "/api/log/save", method = RequestMethod.POST)
     public void saveLog(LogInfo info);
 
 }

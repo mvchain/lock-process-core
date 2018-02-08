@@ -1,7 +1,7 @@
 package com.mvc.common.msg;
 
 /**
- * Created by ace on 2017/8/23.
+ * @author qyc
  */
 public class BaseResponse {
     private int status = 200;

@@ -1,7 +1,7 @@
 package com.mvc.auth.client.exception;
 
 /**
- * Created by ace on 2017/9/15.
+ * @author qyc
  */
 public class JwtTokenExpiredException extends Exception {
     public JwtTokenExpiredException(String s) {

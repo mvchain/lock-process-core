@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
@@ -39,7 +40,7 @@ public class LockRecordService extends BaseBiz<LockRecordMapper, LockRecord> {
     @Autowired
     private RedisTemplate redisTemplate;
 
-    public void lock(LockRecordDTO lockRecordDTO) {
+    public void lock(LockRecordDTO lockRecordDTO) throws UnsupportedEncodingException {
         // 金额校验
         checkLock(lockRecordDTO);
 
@@ -61,8 +62,9 @@ public class LockRecordService extends BaseBiz<LockRecordMapper, LockRecord> {
         capitalService.updateValue(lockRecordDTO.getQuantity(), lockRecordDTO.getUserId(), lockRecordDTO.getCoinId(), lockRecordDTO.getInterest());
     }
 
-    private void checkLock(LockRecordDTO lockRecordDTO) {
-
+    private void checkLock(LockRecordDTO lockRecordDTO) throws UnsupportedEncodingException {
+        boolean lockSwitch = ConfigUtil.lockConfigMap.get(lockRecordDTO.getType()).getSwitchKey() == 1;
+        io.jsonwebtoken.lang.Assert.isTrue(lockSwitch, "系统错误, 请稍后再试");
         Capital capital = new Capital();
         capital.setUserId(BaseContextHandler.getUserIDInt());
         capital.setCoinId(CoinUtil.getId(lockRecordDTO.getType()));
@@ -72,7 +74,10 @@ public class LockRecordService extends BaseBiz<LockRecordMapper, LockRecord> {
         BigInteger locked = null == capitalTemp ? BigInteger.ZERO : capitalTemp.getLocked();
         BigInteger balance = null == capitalTemp ? BigInteger.ZERO : capitalTemp.getBalance();
         BigInteger lockValue = CoinUtil.Value2wei(lockRecordDTO.getValue(), lockRecordDTO.getType());
-        if (ConfigUtil.lockConfigMap.get(lockRecordDTO.getType()).getSwitchKey() == 1) {
+        if (lockSwitch) {
+            BigInteger min = CoinUtil.Value2wei(ConfigUtil.lockConfigMap.get(lockRecordDTO.getType()).getMax(), lockRecordDTO.getType());
+            // 锁仓金额大于最小锁仓金额
+            Assert.isTrue(lockRecordDTO.getValue().compareTo( ConfigUtil.lockConfigMap.get(lockRecordDTO.getType()).getMin()) >= 0, "锁仓金额过小");
             // 锁仓上限 - 已锁仓金额 - 需要锁仓的金额 > 0 且 余额 - 需要锁仓的金额 > 0
             Assert.isTrue(limit.subtract(locked).subtract(lockValue).compareTo(BigInteger.ZERO) >= 0 && balance.subtract(locked).compareTo(BigInteger.ZERO) >= 0, "余额不足");
         }

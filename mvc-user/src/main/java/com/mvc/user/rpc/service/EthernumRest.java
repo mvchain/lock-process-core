@@ -16,7 +16,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @FeignClient("mvc-etherenum")
 public interface EthernumRest {
 
-
+    /**
+     * personal_newAccount
+     *
+     * @param newAccountDTO
+     * @return
+     */
     @RequestMapping(value = "ethereum/personal_newAccount", method = RequestMethod.POST)
     Result<String> personal_newAccount(@RequestBody NewAccountDTO newAccountDTO);
 

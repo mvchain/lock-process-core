@@ -4,13 +4,22 @@ package com.mvc.auth.service;
 import java.util.List;
 
 /**
- * Created by ace on 2017/9/10.
+ * @author qyc
  */
 public interface AuthClientService {
+    /**
+     * apply
+     *
+     * @param clientId
+     * @param secret
+     * @return
+     * @throws Exception
+     */
     public String apply(String clientId, String secret) throws Exception;
 
     /**
      * 获取授权的客户端列表
+     *
      * @param serviceId
      * @param secret
      * @return
@@ -19,12 +28,18 @@ public interface AuthClientService {
 
     /**
      * 获取服务授权的客户端列表
+     *
      * @param serviceId
      * @return
      */
     public List<String> getAllowedClient(String serviceId);
 
-    public void registryClient();
-
+    /**
+     * validate
+     *
+     * @param clientId
+     * @param secret
+     * @throws Exception
+     */
     public void validate(String clientId, String secret) throws Exception;
 }

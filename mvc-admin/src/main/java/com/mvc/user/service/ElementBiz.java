@@ -8,6 +8,7 @@ import com.mvc.user.mapper.ElementMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -34,13 +35,13 @@ public class ElementBiz extends BaseBiz<ElementMapper, Element> {
 
     @Override
     @CacheClear(keys = {"permission:ele", "permission"})
-    public void insertSelective(Element entity) {
+    public void insertSelective(Element entity) throws UnsupportedEncodingException {
         super.insertSelective(entity);
     }
 
     @Override
     @CacheClear(keys = {"permission:ele", "permission"})
-    public void updateSelectiveById(Element entity) {
+    public void updateSelectiveById(Element entity) throws UnsupportedEncodingException {
         super.updateSelectiveById(entity);
     }
 }

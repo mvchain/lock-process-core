@@ -1,9 +1,9 @@
 package com.mvc.auth.common.util.jwt;
 
 /**
- * Created by ace on 2017/9/10.
+ * @author qyc
  */
-public interface IJwtInfo {
+public interface IJWTInfo {
     /**
      * 获取用户名
      * @return

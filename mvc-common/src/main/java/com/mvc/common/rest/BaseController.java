@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +32,7 @@ public class BaseController<Biz extends BaseBiz,Entity> {
 
     @RequestMapping(value = "",method = RequestMethod.POST)
     @ResponseBody
-    public ObjectRestResponse<Entity> add(@RequestBody Entity entity){
+    public ObjectRestResponse<Entity> add(@RequestBody Entity entity) throws UnsupportedEncodingException {
         baseBiz.insertSelective(entity);
         return new ObjectRestResponse<Entity>();
     }
@@ -47,7 +48,7 @@ public class BaseController<Biz extends BaseBiz,Entity> {
 
     @RequestMapping(value = "/{id}",method = RequestMethod.PUT)
     @ResponseBody
-    public ObjectRestResponse<Entity> update(@RequestBody Entity entity){
+    public ObjectRestResponse<Entity> update(@RequestBody Entity entity) throws UnsupportedEncodingException {
         baseBiz.updateSelectiveById(entity);
         return new ObjectRestResponse<Entity>();
     }

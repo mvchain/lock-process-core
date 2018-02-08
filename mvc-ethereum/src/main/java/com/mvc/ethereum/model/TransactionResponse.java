@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * TransactionResponse wrapper.
+ * @author qyc
  */
 @Getter
 @Setter
@@ -13,7 +13,8 @@ public class TransactionResponse<T> {
     private String transactionHash;
     private T event;
 
-    TransactionResponse() { }
+    TransactionResponse() {
+    }
 
     public TransactionResponse(String transactionHash) {
         this(transactionHash, null);

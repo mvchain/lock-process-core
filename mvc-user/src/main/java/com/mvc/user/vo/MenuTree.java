@@ -3,7 +3,7 @@ package com.mvc.user.vo;
 import com.mvc.common.vo.TreeNode;
 
 /**
- * Created by Ace on 2017/6/12.
+ * @author qyc
  */
 public class MenuTree extends TreeNode {
     String icon;
@@ -75,12 +75,14 @@ public class MenuTree extends TreeNode {
         this.title = name;
         this.label = name;
     }
+
     public MenuTree(int id, String name, MenuTree parent) {
         this.id = id;
         this.parentId = parent.getId();
         this.title = name;
         this.label = name;
     }
+
     public String getIcon() {
         return icon;
     }

@@ -1,11 +1,12 @@
 package com.mvc.console.dto;
 
-import com.sun.tools.internal.xjc.reader.xmlschema.bindinfo.BIInlineBinaryData;
 import lombok.Data;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 
+/**
+ * @author qyc
+ */
 @Data
 public class SendTransactionDTO {
 

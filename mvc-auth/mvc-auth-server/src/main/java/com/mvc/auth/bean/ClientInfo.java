@@ -1,15 +1,16 @@
 package com.mvc.auth.bean;
 
 
-import com.mvc.auth.common.util.jwt.IJwtInfo;
+import com.mvc.auth.common.util.jwt.IJWTInfo;
 
 /**
- * Created by ace on 2017/9/10.
+ * @author qyc
  */
-public class ClientInfo implements IJwtInfo {
+public class ClientInfo implements IJWTInfo {
     String clientId;
     String name;
     String address;
+
     public ClientInfo(String clientId, String name, String id) {
         this.clientId = clientId;
         this.name = name;
@@ -28,6 +29,7 @@ public class ClientInfo implements IJwtInfo {
     }
 
     String id;
+
     public String getClientId() {
         return clientId;
     }

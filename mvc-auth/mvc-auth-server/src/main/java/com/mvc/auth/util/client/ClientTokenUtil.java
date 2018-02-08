@@ -1,6 +1,6 @@
 package com.mvc.auth.util.client;
 
-import com.mvc.auth.common.util.jwt.IJwtInfo;
+import com.mvc.auth.common.util.jwt.IJWTInfo;
 import com.mvc.auth.common.util.jwt.JWTHelper;
 import com.mvc.auth.configuration.KeyConfiguration;
 import org.slf4j.Logger;
@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Created by ace on 2017/9/10.
+ * @author qyc
  */
 @Configuration
 public class ClientTokenUtil {
@@ -21,11 +21,11 @@ public class ClientTokenUtil {
     @Autowired
     private KeyConfiguration keyConfiguration;
 
-    public String generateToken(IJwtInfo jwtInfo) throws Exception {
+    public String generateToken(IJWTInfo jwtInfo) throws Exception {
         return JWTHelper.generateToken(jwtInfo, keyConfiguration.getServicePriKey(), expire);
     }
 
-    public IJwtInfo getInfoFromToken(String token) throws Exception {
+    public IJWTInfo getInfoFromToken(String token) throws Exception {
         return JWTHelper.getInfoFromToken(token, keyConfiguration.getServicePubKey());
     }
 

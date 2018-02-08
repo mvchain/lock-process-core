@@ -9,15 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import tk.mybatis.mapper.common.Mapper;
 import tk.mybatis.mapper.entity.Example;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Mr.AG
- * Date: 17/1/13
- * Time: 15:13
- * Version 1.0.0
+ * @author qyc
  */
 public abstract class BaseBiz<M extends Mapper<T>, T> {
 
@@ -53,13 +51,13 @@ public abstract class BaseBiz<M extends Mapper<T>, T> {
     }
 
 
-    public void insert(T entity) {
+    public void insert(T entity) throws UnsupportedEncodingException {
         EntityUtils.setCreatAndUpdatInfo(entity);
         mapper.insert(entity);
     }
 
 
-    public void insertSelective(T entity) {
+    public void insertSelective(T entity) throws UnsupportedEncodingException {
         EntityUtils.setCreatAndUpdatInfo(entity);
         mapper.insertSelective(entity);
 
@@ -76,13 +74,13 @@ public abstract class BaseBiz<M extends Mapper<T>, T> {
     }
 
 
-    public void updateById(T entity) {
+    public void updateById(T entity) throws UnsupportedEncodingException {
         EntityUtils.setUpdatedInfo(entity);
         mapper.updateByPrimaryKey(entity);
     }
 
 
-    public void updateSelectiveById(T entity) {
+    public void updateSelectiveById(T entity) throws UnsupportedEncodingException {
         EntityUtils.setUpdatedInfo(entity);
         mapper.updateByPrimaryKeySelective(entity);
 
@@ -99,7 +97,7 @@ public abstract class BaseBiz<M extends Mapper<T>, T> {
     public TableResultResponse<T> selectByQuery(Query query) {
         Class<T> clazz = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[1];
         Example example = new Example(clazz);
-        if(query.entrySet().size()>0) {
+        if (query.entrySet().size() > 0) {
             Example.Criteria criteria = example.createCriteria();
             for (Map.Entry<String, Object> entry : query.entrySet()) {
                 try {

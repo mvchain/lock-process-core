@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -29,7 +30,7 @@ public class ClientBiz extends BaseBiz<ClientMapper,Client> {
         return mapper.selectAuthorityServiceInfo(id);
     }
 
-    public void modifyClientServices(int id, String clients) {
+    public void modifyClientServices(int id, String clients) throws UnsupportedEncodingException {
         clientServiceMapper.deleteByServiceId(id);
         if (!StringUtils.isEmpty(clients)) {
             String[] mem = clients.split(",");

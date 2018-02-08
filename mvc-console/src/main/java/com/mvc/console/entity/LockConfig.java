@@ -19,6 +19,5 @@ public class LockConfig {
     private BigDecimal min;
     private BigDecimal max;
     private Integer month;
-    // 利率
     private Float interest;
 }

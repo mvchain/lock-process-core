@@ -13,7 +13,6 @@ import java.util.List;
 public class AuthRemoteEvent extends RemoteApplicationEvent {
     private List<String> allowedClient;
 
-    //jackson序列化反序列化必须有无参构造函数
     public AuthRemoteEvent() {
     }
 

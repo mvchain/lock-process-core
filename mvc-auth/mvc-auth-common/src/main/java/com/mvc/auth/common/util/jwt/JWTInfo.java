@@ -3,9 +3,9 @@ package com.mvc.auth.common.util.jwt;
 import java.io.Serializable;
 
 /**
- * Created by ace on 2017/9/10.
+ * @author qyc
  */
-public class JWTInfo implements Serializable,IJwtInfo {
+public class JWTInfo implements Serializable, IJWTInfo {
     private String username;
     private String userId;
     private String name;

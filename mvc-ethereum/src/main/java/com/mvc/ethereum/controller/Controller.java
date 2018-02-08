@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.*;
 import org.web3j.protocol.core.methods.request.Transaction;
 
 /**
- * Controller for our ERC-20 contract API.
+ * @author qyc
  */
 @Api("ERC-20 token standard API")
 @RestController
 public class Controller {
     @Autowired
-    private com.mvc.ethereum.service.ContractService ContractService;
+    private com.mvc.ethereum.service.ContractService contractService;
     @Autowired
     private TransationService transationService;
 
@@ -33,7 +33,7 @@ public class Controller {
     public Object balanceOf(
             @PathVariable String contractAddress,
             @RequestBody final BalanceDTO balanceDTO) {
-        return ContractService.balanceOf(contractAddress, balanceDTO.getAddress());
+        return contractService.balanceOf(contractAddress, balanceDTO.getAddress());
     }
 
     @RequestMapping(value = "/{contractAddress}/eth_sendTransaction", method = RequestMethod.POST)

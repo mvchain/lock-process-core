@@ -13,9 +13,8 @@ import java.util.Map;
 import java.util.Vector;
 
 /**
- * ${DESCRIPTION}
  *
- * @author wanghaobin
+ * @author qyc
  * @create 2017-07-01 17:04
  */
 public class ParameterRequestWrapper extends HttpServletRequestWrapper {

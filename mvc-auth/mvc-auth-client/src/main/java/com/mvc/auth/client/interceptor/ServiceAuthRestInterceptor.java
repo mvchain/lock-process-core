@@ -3,7 +3,7 @@ package com.mvc.auth.client.interceptor;
 import com.mvc.auth.client.annotation.IgnoreClientToken;
 import com.mvc.auth.client.config.ServiceAuthConfig;
 import com.mvc.auth.client.jwt.ServiceAuthUtil;
-import com.mvc.auth.common.util.jwt.IJwtInfo;
+import com.mvc.auth.common.util.jwt.IJWTInfo;
 import com.mvc.common.exception.auth.ClientForbiddenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
- * Created by ace on 2017/9/12.
+ * @author qyc
  */
 @SuppressWarnings("ALL")
 public class ServiceAuthRestInterceptor extends HandlerInterceptorAdapter {
@@ -38,14 +38,14 @@ public class ServiceAuthRestInterceptor extends HandlerInterceptorAdapter {
         if (annotation == null) {
             annotation = handlerMethod.getMethodAnnotation(IgnoreClientToken.class);
         }
-        if(true) {
+        if (true) {
             return super.preHandle(request, response, handler);
         }
         String token = request.getHeader(serviceAuthConfig.getTokenHeader());
-        IJwtInfo infoFromToken = serviceAuthUtil.getInfoFromToken(token);
+        IJWTInfo infoFromToken = serviceAuthUtil.getInfoFromToken(token);
         String uniqueName = infoFromToken.getUniqueName();
-        for(String client:serviceAuthUtil.getAllowedClient()){
-            if(client.equals(uniqueName)){
+        for (String client : serviceAuthUtil.getAllowedClient()) {
+            if (client.equals(uniqueName)) {
                 return super.preHandle(request, response, handler);
             }
         }

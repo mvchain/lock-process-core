@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
- * 官方包下的转换方法使用了BigInteger, 导致转化后小数被抹去, 这里换成了BigDecimal
+ * @author qyc
  */
 public enum Denomination {
     WEI(newBigDecimal(0)),
@@ -43,7 +43,7 @@ public enum Denomination {
         }
     }
 
-    public static BigInteger getFriendlyValue(BigDecimal value){
+    public static BigInteger getFriendlyValue(BigDecimal value) {
         return value.multiply(ETHER.value()).toBigInteger();
     }
 

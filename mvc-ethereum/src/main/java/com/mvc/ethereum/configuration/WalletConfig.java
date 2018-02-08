@@ -40,7 +40,6 @@ public class WalletConfig {
         return account.get(type);
     }
 
-    // 是否为钱包账户
     public Boolean isWalletAccount(String address){
         List<Map.Entry<String, String>> list = account.entrySet().stream().filter(set -> set.getValue().equalsIgnoreCase(address)).collect(Collectors.toList());
         return !CollectionUtils.isEmpty(list);

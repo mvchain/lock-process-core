@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Created by ace on 2017/9/15.
+ * @author qyc
  */
 public class UserAuthConfig {
 
@@ -22,7 +22,7 @@ public class UserAuthConfig {
         this.tokenHeader = tokenHeader;
     }
 
-    public String getToken(HttpServletRequest request){
+    public String getToken(HttpServletRequest request) {
         return request.getHeader(this.getTokenHeader());
     }
 

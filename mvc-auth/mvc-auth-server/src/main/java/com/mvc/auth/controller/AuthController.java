@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * @author qyc
+ */
 @RestController
 @RequestMapping("jwt")
 public class AuthController {
@@ -41,7 +44,7 @@ public class AuthController {
             HttpServletRequest request) {
         String token = request.getHeader(tokenHeader);
         String refreshedToken = authService.refresh(token);
-        if(refreshedToken == null) {
+        if (refreshedToken == null) {
             return ResponseEntity.badRequest().body(null);
         } else {
             return ResponseEntity.ok(new JwtAuthenticationResponse(refreshedToken));
@@ -55,7 +58,7 @@ public class AuthController {
     }
 
     @RequestMapping(value = "invalid", method = RequestMethod.POST)
-    public ResponseEntity<?> invalid(@RequestHeader("access-token") String token){
+    public ResponseEntity<?> invalid(@RequestHeader("access-token") String token) {
         authService.invalid(token);
         return ResponseEntity.ok(true);
     }

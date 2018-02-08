@@ -24,9 +24,13 @@ public class AdminBalanceVO {
     private DepositeCount deposite;
     private LockCount lock;
     private BigInteger coinId;
+    private BigInteger otherBalance;
 
     public Double getBalanceStr() {
         return  CoinUtil.wei2Value(coinId, balance);
     }
 
+    public Double getOtherBalanceStr() {
+        return  CoinUtil.wei2Value(coinId, otherBalance);
+    }
 }

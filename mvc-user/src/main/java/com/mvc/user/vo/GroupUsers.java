@@ -5,10 +5,10 @@ import com.mvc.user.entity.User;
 import java.util.List;
 
 /**
- * Created by Ace on 2017/6/18.
+ * @author qyc
  */
 public class GroupUsers {
-    List<User> members ;
+    List<User> members;
     List<User> leaders;
 
     public GroupUsers() {

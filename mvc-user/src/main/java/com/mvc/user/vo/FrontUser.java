@@ -5,7 +5,7 @@ import com.mvc.api.vo.authority.PermissionInfo;
 import java.util.List;
 
 /**
- * Created by ace on 2017/8/22.
+ * @author qyc
  */
 public class FrontUser {
     public String id;
@@ -15,6 +15,7 @@ public class FrontUser {
     private String image;
     private List<PermissionInfo> menus;
     private List<PermissionInfo> elements;
+
     public String getImage() {
         return image;
     }
@@ -22,7 +23,6 @@ public class FrontUser {
     public void setImage(String image) {
         this.image = image;
     }
-
 
 
     public String getId() {
@@ -56,6 +56,7 @@ public class FrontUser {
     public void setDescription(String description) {
         this.description = description;
     }
+
     public List<PermissionInfo> getMenus() {
         return menus;
     }

@@ -7,13 +7,13 @@ import com.mvc.common.dto.LockRecordDTO;
 import com.mvc.common.dto.TransactionDTO;
 import com.mvc.common.msg.Result;
 import com.mvc.common.msg.ResultGenerator;
+import com.mvc.common.util.RSACoder;
 import com.mvc.ethereum.model.dto.*;
 import com.mvc.ethereum.model.vo.AdminBalanceVO;
 import com.mvc.ethereum.model.vo.LockRecordVO;
 import com.mvc.ethereum.model.vo.TransactionVO;
 import com.mvc.ethereum.service.RpcService;
 import com.mvc.ethereum.utils.FileUtil;
-import com.mvc.common.util.RSACoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 /**
- * all demo in this controller
+ * @author qyc
  */
 @RestController
 @RequestMapping("ethereum")
@@ -138,6 +138,7 @@ public class EthereumController {
 
     /**
      * personal by keyDate
+     *
      * @param file
      * @param passhphrase
      * @return
@@ -151,6 +152,7 @@ public class EthereumController {
 
     /**
      * personal by privateKey
+     *
      * @param personalByPrivateKeyDTO
      * @return
      * @throws Exception
@@ -171,28 +173,30 @@ public class EthereumController {
 
     /**
      * 查询余额
+     *
      * @param transactionDTO
      * @return
      */
     @RequestMapping(value = "transactions", method = RequestMethod.GET)
-    public Result transaction(@ModelAttribute @Valid TransactionDTO transactionDTO){
+    public Result transaction(@ModelAttribute @Valid TransactionDTO transactionDTO) {
         PageInfo<TransactionVO> result = rpcService.transactions(transactionDTO);
         return ResultGenerator.genSuccessResult(result);
     }
 
     /**
      * 锁仓
+     *
      * @param lockRecordDTO
      * @return
      */
     @RequestMapping(value = "lock_record", method = RequestMethod.GET)
-    public Result lock_record(@ModelAttribute @Valid LockRecordDTO lockRecordDTO){
+    public Result lock_record(@ModelAttribute @Valid LockRecordDTO lockRecordDTO) {
         PageInfo<LockRecordVO> result = rpcService.lock_record(lockRecordDTO);
         return ResultGenerator.genSuccessResult(result);
     }
 
     @RequestMapping(value = "all_balance", method = RequestMethod.GET)
-    public Result balance(@RequestParam("type") String type,@RequestParam("timeUnit") String timeUnit) throws Exception {
+    public Result balance(@RequestParam("type") String type, @RequestParam("timeUnit") String timeUnit) throws Exception {
         AdminBalanceVO adminBalanceVO = rpcService.getAdminBalance(type, timeUnit);
         return ResultGenerator.genSuccessResult(adminBalanceVO);
     }

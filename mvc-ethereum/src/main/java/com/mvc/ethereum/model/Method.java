@@ -5,7 +5,10 @@ import lombok.*;
 
 import javax.validation.constraints.NotNull;
 
-@Builder(builderClassName="Builder", toBuilder=true)
+/**
+ * @author qyc
+ */
+@Builder(builderClassName = "Builder", toBuilder = true)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,6 +18,7 @@ public class Method {
     @NotNull
     private Object[] args;
     private String name;
+
     public Object[] getArgs() {
         if (args != null) {
             return args;

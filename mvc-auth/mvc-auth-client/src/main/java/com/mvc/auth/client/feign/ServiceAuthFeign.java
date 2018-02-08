@@ -9,17 +9,49 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 
 /**
- * Created by ace on 2017/9/15.
+ * @author qyc
  */
-@FeignClient(value = "${auth.serviceId}",configuration = {})
+@FeignClient(value = "${auth.serviceId}", configuration = {})
 public interface ServiceAuthFeign {
+
+    /**
+     * get allowed client
+     *
+     * @param serviceId
+     * @param secret
+     * @return
+     */
     @RequestMapping(value = "/client/myClient")
     public ObjectRestResponse<List<String>> getAllowedClient(@RequestParam("serviceId") String serviceId, @RequestParam("secret") String secret);
-    @RequestMapping(value = "/client/token",method = RequestMethod.POST)
+
+    /**
+     * getAccessToken
+     *
+     * @param clientId
+     * @param secret
+     * @return
+     */
+    @RequestMapping(value = "/client/token", method = RequestMethod.POST)
     public ObjectRestResponse getAccessToken(@RequestParam("clientId") String clientId, @RequestParam("secret") String secret);
-    @RequestMapping(value = "/client/servicePubKey",method = RequestMethod.POST)
+
+    /**
+     * getServicePublicKey
+     *
+     * @param clientId
+     * @param secret
+     * @return
+     */
+    @RequestMapping(value = "/client/servicePubKey", method = RequestMethod.POST)
     public ObjectRestResponse<byte[]> getServicePublicKey(@RequestParam("clientId") String clientId, @RequestParam("secret") String secret);
-    @RequestMapping(value = "/client/userPubKey",method = RequestMethod.POST)
+
+    /**
+     * getUserPublicKey
+     *
+     * @param clientId
+     * @param secret
+     * @return
+     */
+    @RequestMapping(value = "/client/userPubKey", method = RequestMethod.POST)
     public ObjectRestResponse<byte[]> getUserPublicKey(@RequestParam("clientId") String clientId, @RequestParam("secret") String secret);
 
 }

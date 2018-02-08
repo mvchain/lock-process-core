@@ -8,7 +8,7 @@ import com.mvc.auth.client.config.UserAuthConfig;
 import com.mvc.auth.client.interceptor.ServiceFeignInterceptor;
 import com.mvc.auth.client.jwt.ServiceAuthUtil;
 import com.mvc.auth.client.jwt.UserAuthUtil;
-import com.mvc.auth.common.util.jwt.IJwtInfo;
+import com.mvc.auth.common.util.jwt.IJWTInfo;
 import com.mvc.common.context.BaseContextHandler;
 import com.mvc.common.msg.auth.TokenErrorResponse;
 import com.mvc.common.msg.auth.TokenForbiddenResponse;
@@ -115,7 +115,7 @@ public class AdminAccessFilter extends ZuulFilter {
         if (isStartWith(requestUri)) {
             return null;
         }
-        IJwtInfo user = null;
+        IJWTInfo user = null;
         try {
             user = getJWTUser(request, ctx);
         } catch (Exception e) {
@@ -149,7 +149,7 @@ public class AdminAccessFilter extends ZuulFilter {
         });
     }
 
-    private void setCurrentUserInfoAndLog(RequestContext ctx, IJwtInfo user, PermissionInfo pm) throws UnsupportedEncodingException {
+    private void setCurrentUserInfoAndLog(RequestContext ctx, IJWTInfo user, PermissionInfo pm) throws UnsupportedEncodingException {
         String host = ClientUtil.getClientIp(ctx.getRequest());
         ctx.addZuulRequestHeader("userId", user.getId());
         ctx.addZuulRequestHeader("userName", URLEncoder.encode(user.getName(), "utf-8"));
@@ -165,7 +165,7 @@ public class AdminAccessFilter extends ZuulFilter {
      * @param ctx
      * @return
      */
-    private IJwtInfo getJWTUser(HttpServletRequest request, RequestContext ctx) throws Exception {
+    private IJWTInfo getJWTUser(HttpServletRequest request, RequestContext ctx) throws Exception {
         String authToken = request.getHeader(userAuthConfig.getTokenHeader());
         if (StringUtils.isBlank(authToken)) {
             authToken = request.getParameter("token");
@@ -176,7 +176,7 @@ public class AdminAccessFilter extends ZuulFilter {
     }
 
 
-    private void checkUserPermission(PermissionInfo[] permissions, RequestContext ctx, IJwtInfo user) {
+    private void checkUserPermission(PermissionInfo[] permissions, RequestContext ctx, IJWTInfo user) {
         List<PermissionInfo> permissionInfos = userService.getPermissionByUsername(user.getUniqueName());
         PermissionInfo current = null;
         for (PermissionInfo info : permissions) {

@@ -7,12 +7,15 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 
-@Builder(builderClassName="Builder", toBuilder=true)
+/**
+ * @author qyc
+ */
+@Builder(builderClassName = "Builder", toBuilder = true)
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ToString(of= {"contractAddress", "accountAddr"}, includeFieldNames = false)
+@ToString(of = {"contractAddress", "accountAddr"}, includeFieldNames = false)
 public class Receipt implements Serializable {
     @Getter
     private String transactionHash;
@@ -29,7 +32,9 @@ public class Receipt implements Serializable {
     @Setter
     private String accountAddr;
 
-    public enum Type {CREATE, MODIFY};
+    public enum Type {CREATE, MODIFY}
+
+    ;
 
     public long getTransactionIndex() {
         return decrypt(transactionIndex);

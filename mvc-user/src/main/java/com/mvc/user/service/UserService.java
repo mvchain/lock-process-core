@@ -3,6 +3,8 @@ package com.mvc.user.service;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.mvc.api.vo.user.NewAccountDTO;
+import com.mvc.auth.common.constatns.CommonConstants;
+import com.mvc.common.biz.BaseBiz;
 import com.mvc.common.context.BaseContextHandler;
 import com.mvc.common.msg.Result;
 import com.mvc.common.util.Query;
@@ -15,7 +17,6 @@ import com.mvc.user.mapper.UserMapper;
 import com.mvc.user.rpc.service.AuthService;
 import com.mvc.user.rpc.service.EthernumRest;
 import com.mvc.user.rpc.service.SmsService;
-import com.mvc.common.biz.BaseBiz;
 import com.mvc.user.util.CoinUtil;
 import com.mvc.user.vo.UserVO;
 import io.jsonwebtoken.lang.Assert;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpSession;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
@@ -41,7 +43,7 @@ import java.util.Map;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class UserService extends BaseBiz<UserMapper,User> {
+public class UserService extends BaseBiz<UserMapper, User> {
 
     @Value("${auth.client.id}")
     protected String clientId;
@@ -60,7 +62,7 @@ public class UserService extends BaseBiz<UserMapper,User> {
     @Autowired
     private CapitalMapper capitalMapper;
 
-    public User insert(UserDTO user) {
+    public User insert(UserDTO user) throws UnsupportedEncodingException {
         Assert.isNull(userMapper.selectUserByPhone(user), "手机号已注册!");
         MobileValiDTO mobileValiDTO = new MobileValiDTO();
         mobileValiDTO.setMobile(user.getCellphone());
@@ -76,7 +78,7 @@ public class UserService extends BaseBiz<UserMapper,User> {
     }
 
     private void insertDefaultBalance(User userBean) {
-        for(Map.Entry<BigInteger, CoinInfo> map : CoinUtil.coinMap.entrySet()){
+        for (Map.Entry<BigInteger, CoinInfo> map : CoinUtil.coinMap.entrySet()) {
             Capital capital = new Capital();
             capital.setUserId(userBean.getId());
             capital.setBalance(BigInteger.ZERO);
@@ -90,32 +92,34 @@ public class UserService extends BaseBiz<UserMapper,User> {
         }
     }
 
-    public String getEthnumKey(){
+    public String getEthnumKey() {
         // TODO 每个用户生成不同密码,加密
         return ethnumKey;
     }
 
     @Async
-    public void updateUserAddress(User user){
+    public void updateUserAddress(User user) {
         // 生成以太坊地址
         NewAccountDTO newAccountDTO = new NewAccountDTO();
         newAccountDTO.setPassphrase(ethnumKey);
-        Result<String> addressResp =ethernumRest.personal_newAccount(newAccountDTO);
+        Result<String> addressResp = ethernumRest.personal_newAccount(newAccountDTO);
         user.setAddressEth(addressResp.getData());
         // 添加redis事件监听
-        redisTemplate.opsForValue().set(BaseContextHandler.ADDR_LISTEN_+addressResp.getData(), user.getId());
+        redisTemplate.opsForValue().set(BaseContextHandler.ADDR_LISTEN_ + addressResp.getData(), user.getId());
         userMapper.updateByPrimaryKeySelective(user);
     }
 
     public String login(HttpSession session, UserDTO userDTO) throws Exception {
-        Assert.isTrue(userDTO.getValiCode().equalsIgnoreCase(session.getAttribute("imageCode") + ""),"验证码不正确！" );
+        Assert.isTrue(userDTO.getValiCode().equalsIgnoreCase(session.getAttribute("imageCode") + ""), "验证码不正确！");
         User user = userMapper.selectUserByPwd(userDTO);
         Assert.notNull(user, "用户名或密码错误");
+        Assert.isTrue(user.getStatus() == 1, "用户已停用");
         Result<String> result = authService.createUserAuthenticationToken(new TokenDTO(user.getCellphone(), clientId, user.getId(), user.getAddressEth()));
+        redisTemplate.opsForValue().set(CommonConstants.USER_STATUS + user.getCellphone(), user.getStatus());
         return result.getData();
     }
 
-    public String forget(ForgetDTO userDTO) {
+    public String forget(ForgetDTO userDTO) throws UnsupportedEncodingException {
         MobileValiDTO mobileValiDTO = new MobileValiDTO();
         mobileValiDTO.setMobile(userDTO.getCellphone());
         mobileValiDTO.setValiCode(userDTO.getValiCode());
@@ -129,7 +133,7 @@ public class UserService extends BaseBiz<UserMapper,User> {
         return result.getData();
     }
 
-    public String updatePwd(ForgetDTO userDTO) {
+    public String updatePwd(UpdateDTO userDTO) throws UnsupportedEncodingException {
         User user = userMapper.selectUserByPwd(userDTO);
         Assert.notNull(user, "用户名或密码错误");
         user.setPassword(userDTO.getNewPassword());
@@ -137,12 +141,7 @@ public class UserService extends BaseBiz<UserMapper,User> {
         return "success";
     }
 
-    public String updatePhone(UpdatePhoneDTO updatePhoneDTO) {
-        MobileValiDTO mobileValiDTO = new MobileValiDTO();
-        mobileValiDTO.setMobile(updatePhoneDTO.getCellphone());
-        mobileValiDTO.setValiCode(updatePhoneDTO.getValiCode());
-        ResponseEntity<Boolean> checkResult = smsService.checkSms(mobileValiDTO);
-        Assert.isTrue(checkResult.getBody(), "验证码错误");
+    public String updatePhone(UpdatePhoneDTO updatePhoneDTO) throws UnsupportedEncodingException {
         User user = userMapper.selectUserByPwd(updatePhoneDTO);
         Assert.notNull(user, "用户名或密码错误");
         user.setCellphone(updatePhoneDTO.getNewCellPhone());
@@ -173,30 +172,11 @@ public class UserService extends BaseBiz<UserMapper,User> {
         Assert.notNull(userMapper.selectByPrimaryKey(pwdCheckDTO.getUserId()), "密码错误");
     }
 
-//    @Override
-//    public void insertSelective(User entity) {
-//        String password = new BCryptPasswordEncoder(UserConstant.PW_ENCORDER_SALT).encode(entity.getPassword());
-//        entity.setPassword(password);
-//        super.insertSelective(entity);
-//    }
-//
-//    @Override
-//    @CacheClear(pre="user{1.username}")
-//    public void updateSelectiveById(User entity) {
-//        super.updateSelectiveById(entity);
-//    }
-//
-//    /**
-//     * 根据用户名获取用户信息
-//     * @param username
-//     * @return
-//     */
-//    @Cache(key="user{1}")
-//    public User getUserByUsername(String username){
-//        User user = new User();
-//        user.setUsername(username);
-//        return mapper.selectOne(user);
-//    }
-
+    public void updateAddress() {
+        List<User> list = userMapper.selectNullAddr();
+        list.stream().forEach(user -> {
+            updateUserAddress(user);
+        });
+    }
 
 }

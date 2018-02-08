@@ -8,19 +8,19 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Created by ace on 2017/9/15.
+ * @author qyc
  */
 @Configuration
-@ComponentScan({"com.mvc.auth.client","com.mvc.auth.common.event"})
+@ComponentScan({"com.mvc.auth.client", "com.mvc.auth.common.event"})
 @RemoteApplicationEventScan(basePackages = "com.mvc.auth.common.event")
 public class AutoConfiguration {
     @Bean
-    ServiceAuthConfig getServiceAuthConfig(){
+    ServiceAuthConfig getServiceAuthConfig() {
         return new ServiceAuthConfig();
     }
 
     @Bean
-    UserAuthConfig getUserAuthConfig(){
+    UserAuthConfig getUserAuthConfig() {
         return new UserAuthConfig();
     }
 }

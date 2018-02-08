@@ -1,13 +1,12 @@
 package com.mvc.console.rpc.service;
 
 import com.mvc.common.msg.Result;
-import com.mvc.console.dto.MobileValiDTO;
 import com.mvc.console.dto.PwdCheckDTO;
 import org.springframework.cloud.netflix.feign.FeignClient;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 /**
  * sms remote rpc
@@ -17,10 +16,22 @@ import javax.validation.Valid;
  */
 @FeignClient("mvc-user")
 public interface UserService {
-
+    /**
+     * checkPwd
+     *
+     * @param pwdCheckDTO
+     * @param authorization
+     * @return
+     */
     @RequestMapping(value = "checkPwd", method = RequestMethod.POST)
     Result checkPwd(@RequestBody PwdCheckDTO pwdCheckDTO, @RequestHeader("Authorization") String authorization);
 
+    /**
+     * getEthnumKey
+     *
+     * @param authorization
+     * @return
+     */
     @RequestMapping(value = "ethnumKey", method = RequestMethod.GET)
     Result<String> getEthnumKey(@RequestHeader("Authorization") String authorization);
 

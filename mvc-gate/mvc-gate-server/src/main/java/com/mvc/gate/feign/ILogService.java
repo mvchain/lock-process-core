@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @FeignClient("mvc-admin")
 public interface ILogService {
+  /**
+   * saveLog
+   * @param info
+   */
   @RequestMapping(value="/api/log/save",method = RequestMethod.POST)
   public void saveLog(LogInfo info);
 }

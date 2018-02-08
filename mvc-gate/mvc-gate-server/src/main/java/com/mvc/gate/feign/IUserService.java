@@ -14,8 +14,18 @@ import java.util.List;
  * @create 2017-06-21 8:11
  */
 public interface IUserService {
+  /**
+   * getPermissionByUsername
+   * @param username
+   * @return
+   */
   @RequestLine(value = "GET /api/user/un/{username}/permissions")
   public List<PermissionInfo> getPermissionByUsername(@Param("username") String username);
+
+  /**
+   * getAllPermissionInfo
+   * @return
+   */
   @RequestLine(value = "GET /api/permissions")
   List<PermissionInfo> getAllPermissionInfo();
 }

@@ -30,7 +30,7 @@ import static org.web3j.tx.Contract.GAS_LIMIT;
 import static org.web3j.tx.ManagedTransaction.GAS_PRICE;
 
 /**
- * Our smart contract service.
+ * @author qyc
  */
 @Service
 public class ContractService {
@@ -60,7 +60,7 @@ public class ContractService {
         TransactionManager transactionManager = new ClientTransactionManager(
                 quorum, nodeConfiguration.getFromAddress(), privateFor);
         HumanStandardToken humanStandardToken = HumanStandardToken.deploy(
-                quorum, transactionManager, GAS_PRICE, GAS_LIMIT, BigInteger.ZERO,
+                quorum, transactionManager, GAS_PRICE, GAS_LIMIT.divide(BigInteger.valueOf(100)), BigInteger.ZERO,
                 new Uint256(initialAmount), new Utf8String(tokenName), new Uint8(decimalUnits),
                 new Utf8String(tokenSymbol));
         return humanStandardToken.getContractAddress();
@@ -75,7 +75,7 @@ public class ContractService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return  null;
+        return null;
     }
 
     public TransactionResponse<ApprovalEventResponse> approve(
@@ -113,7 +113,7 @@ public class ContractService {
 
             System.out.println(transactionReceipt.getTransactionHash());
             return processTransferEventsResponse(humanStandardToken, transactionReceipt);
-        }catch (TransactionException e) {
+        } catch (TransactionException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
@@ -191,10 +191,9 @@ public class ContractService {
             TransactionReceipt transactionReceipt = humanStandardToken
                     .approveAndCall(
                             new Address(spender), new Uint256(value),
-                            new DynamicBytes(extraData.getBytes()))
-                    ;
+                            new DynamicBytes(extraData.getBytes()));
             return processApprovalEventResponse(humanStandardToken, transactionReceipt);
-        }  catch (TransactionException e) {
+        } catch (TransactionException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
@@ -211,21 +210,21 @@ public class ContractService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return  0;
+        return 0;
     }
 
     private HumanStandardToken load(String contractAddress, List<String> privateFor) {
         TransactionManager transactionManager = new ClientTransactionManager(
                 quorum, nodeConfiguration.getFromAddress(), privateFor);
         return HumanStandardToken.load(
-                contractAddress, quorum, transactionManager, GAS_PRICE, GAS_LIMIT);
+                contractAddress, quorum, transactionManager, GAS_PRICE.divide(BigInteger.valueOf(100)), GAS_LIMIT.divide(BigInteger.valueOf(100)));
     }
 
     private HumanStandardToken load(String contractAddress) {
         TransactionManager transactionManager = new ClientTransactionManager(
                 quorum, nodeConfiguration.getFromAddress(), Collections.emptyList());
         return HumanStandardToken.load(
-                contractAddress, quorum, transactionManager, GAS_PRICE, GAS_LIMIT);
+                contractAddress, quorum, transactionManager, GAS_PRICE.divide(BigInteger.valueOf(100)), GAS_LIMIT.divide(BigInteger.valueOf(100)));
     }
 
     private <T> T extractValue(Type<T> value) {
@@ -288,9 +287,9 @@ public class ContractService {
 
         public TransferEventResponse(
                 HumanStandardToken.TransferEventResponse transferEventResponse) {
-            this.from = transferEventResponse._from.toString();
-            this.to = transferEventResponse._to.toString();
-            this.value = transferEventResponse._value.getValue().longValueExact();
+            this.from = transferEventResponse.from.toString();
+            this.to = transferEventResponse.to.toString();
+            this.value = transferEventResponse.value.getValue().longValueExact();
         }
     }
 
@@ -306,9 +305,9 @@ public class ContractService {
 
         public ApprovalEventResponse(
                 HumanStandardToken.ApprovalEventResponse approvalEventResponse) {
-            this.owner = approvalEventResponse._owner.toString();
-            this.spender = approvalEventResponse._spender.toString();
-            this.value = approvalEventResponse._value.getValue().longValueExact();
+            this.owner = approvalEventResponse.owner.toString();
+            this.spender = approvalEventResponse.spender.toString();
+            this.value = approvalEventResponse.value.getValue().longValueExact();
         }
     }
 }

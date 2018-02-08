@@ -9,6 +9,7 @@ import com.mvc.user.mapper.MenuMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -26,7 +27,7 @@ public class MenuBiz extends BaseBiz<MenuMapper, Menu> {
 
     @Override
     @CacheClear(keys = {"permission:menu", "permission"})
-    public void insertSelective(Menu entity) {
+    public void insertSelective(Menu entity) throws UnsupportedEncodingException {
         if (AdminCommonConstant.ROOT == entity.getParentId()) {
             entity.setPath("/" + entity.getCode());
         } else {
@@ -38,7 +39,7 @@ public class MenuBiz extends BaseBiz<MenuMapper, Menu> {
 
     @Override
     @CacheClear(keys = {"permission:menu", "permission"})
-    public void updateById(Menu entity) {
+    public void updateById(Menu entity) throws UnsupportedEncodingException {
         if (AdminCommonConstant.ROOT == entity.getParentId()) {
             entity.setPath("/" + entity.getCode());
         } else {
@@ -50,7 +51,7 @@ public class MenuBiz extends BaseBiz<MenuMapper, Menu> {
 
     @Override
     @CacheClear(keys = {"permission:menu", "permission"})
-    public void updateSelectiveById(Menu entity) {
+    public void updateSelectiveById(Menu entity) throws UnsupportedEncodingException {
         super.updateSelectiveById(entity);
     }
 

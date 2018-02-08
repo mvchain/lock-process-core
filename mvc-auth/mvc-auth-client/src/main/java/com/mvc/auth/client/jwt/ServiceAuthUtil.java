@@ -7,7 +7,7 @@ import com.mvc.auth.client.exception.JwtSignatureException;
 import com.mvc.auth.client.exception.JwtTokenExpiredException;
 import com.mvc.auth.client.feign.ServiceAuthFeign;
 import com.mvc.auth.common.event.AuthRemoteEvent;
-import com.mvc.auth.common.util.jwt.IJwtInfo;
+import com.mvc.auth.common.util.jwt.IJWTInfo;
 import com.mvc.auth.common.util.jwt.JWTHelper;
 import com.mvc.common.msg.BaseResponse;
 import com.mvc.common.msg.ObjectRestResponse;
@@ -24,12 +24,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.util.List;
 
 /**
- * Created by ace on 2017/9/15.
+ * @author qyc
  */
 @Configuration
 @Slf4j
 @EnableScheduling
-public class ServiceAuthUtil  implements ApplicationListener<AuthRemoteEvent> {
+public class ServiceAuthUtil implements ApplicationListener<AuthRemoteEvent> {
     @Autowired
     private ServiceAuthConfig serviceAuthConfig;
     @Autowired
@@ -38,7 +38,7 @@ public class ServiceAuthUtil  implements ApplicationListener<AuthRemoteEvent> {
     private String clientToken;
 
 
-    public IJwtInfo getInfoFromToken(String token) throws Exception {
+    public IJWTInfo getInfoFromToken(String token) throws Exception {
         try {
             return JWTHelper.getInfoFromToken(token, serviceAuthConfig.getPubKeyByte());
         } catch (ExpiredJwtException ex) {

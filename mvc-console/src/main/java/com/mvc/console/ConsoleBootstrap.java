@@ -11,6 +11,9 @@ import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+/**
+ * @author qyc
+ */
 @EnableEurekaClient
 @EnableCircuitBreaker
 @SpringBootApplication
@@ -22,5 +25,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class ConsoleBootstrap {
     public static void main(String[] args) {
-        new SpringApplicationBuilder(ConsoleBootstrap.class).web(true).run(args);    }
+        new SpringApplicationBuilder(ConsoleBootstrap.class).web(true).run(args);
+    }
 }

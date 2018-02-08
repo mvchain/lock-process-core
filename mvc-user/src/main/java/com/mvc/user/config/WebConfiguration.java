@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * Created by ace on 2017/9/8.
+ * @author qyc
  */
 @Configuration("admimWebConfig")
 @Primary
@@ -57,7 +57,7 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
     }
 
     @Bean
-    public CoinUtil coinUtil(CoinInfoMapper coinInfoMapper){
+    public CoinUtil coinUtil(CoinInfoMapper coinInfoMapper) {
         coinInfoMapper.selectAll().stream().forEach(obj -> {
             CoinUtil.coinMap.put(obj.getId(), obj);
         });
@@ -66,7 +66,7 @@ public class WebConfiguration extends WebMvcConfigurerAdapter {
 
     @Bean
     Request.Options feignOptions() {
-        return new Request.Options(1 * 4000, 1 * 4000);
+        return new Request.Options(10 * 1000, 10 * 1000);
     }
 //    @Override
 //    public void addResourceHandlers(ResourceHandlerRegistry registry) {

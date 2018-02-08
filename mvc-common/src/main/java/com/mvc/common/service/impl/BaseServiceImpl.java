@@ -2,11 +2,13 @@ package com.mvc.common.service.impl;
 
 import com.mvc.common.service.BaseService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import tk.mybatis.mapper.common.Mapper;
 
 import java.util.List;
 
+/**
+ * @author qyc
+ */
 public class BaseServiceImpl<M extends Mapper<T>, T> implements BaseService<T> {
     @Autowired
     protected M mapper;

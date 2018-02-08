@@ -5,7 +5,7 @@ import com.mvc.common.constant.CommonConstants;
 import com.mvc.common.exception.BaseException;
 
 /**
- * Created by ace on 2017/9/10.
+ * @author qyc
  */
 public class ClientInvalidException extends BaseException {
     public ClientInvalidException(String message) {

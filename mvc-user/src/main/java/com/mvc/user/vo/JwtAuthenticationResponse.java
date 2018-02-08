@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * @author qyc
+ */
 @Data
 public class JwtAuthenticationResponse implements Serializable {
     private static final long serialVersionUID = 1250166508152483573L;

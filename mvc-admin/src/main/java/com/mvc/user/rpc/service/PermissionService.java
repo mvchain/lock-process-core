@@ -3,6 +3,7 @@ package com.mvc.user.rpc.service;
 import com.mvc.api.vo.authority.PermissionInfo;
 import com.mvc.api.vo.user.UserInfo;
 import com.mvc.auth.client.jwt.UserAuthUtil;
+import com.mvc.auth.common.util.jwt.IJWTInfo;
 import com.mvc.common.constant.CommonConstants;
 import com.mvc.common.util.TreeUtil;
 import com.mvc.user.constant.AdminCommonConstant;
@@ -129,7 +130,8 @@ public class PermissionService {
     }
 
     public FrontUser getUserInfo(String token) throws Exception {
-        String username = userAuthUtil.getInfoFromToken(token).getUniqueName();
+        IJWTInfo jwtInfo = userAuthUtil.getInfoFromToken(token);
+        String username = jwtInfo.getUniqueName();
         if (username == null) {
             return null;
         }

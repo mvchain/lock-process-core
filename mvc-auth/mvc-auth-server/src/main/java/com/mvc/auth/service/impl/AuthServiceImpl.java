@@ -14,6 +14,9 @@ import org.springframework.util.StringUtils;
 import java.math.BigInteger;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author qyc
+ */
 @Service
 public class AuthServiceImpl implements AuthService {
 
@@ -34,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String login(String username, String password) throws Exception {
-        UserInfo info = userService.validate(username,password);
+        UserInfo info = userService.validate(username, password);
         String token = "";
         if (!StringUtils.isEmpty(info.getId())) {
             token = jwtTokenUtil.generateToken(new JWTInfo(info.getUsername(), info.getId() + "", "admin"));

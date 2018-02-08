@@ -5,9 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Created by ace on 2017/9/15.
+ * @author qyc
  */
-
 public class ServiceAuthConfig {
     private byte[] pubKeyByte;
     @Value("${auth.client.id:null}")
@@ -28,7 +27,7 @@ public class ServiceAuthConfig {
     }
 
     public String getClientId() {
-        return "null".equals(clientId)?applicationName:clientId;
+        return "null".equals(clientId) ? applicationName : clientId;
     }
 
     public void setClientId(String clientId) {
@@ -43,7 +42,7 @@ public class ServiceAuthConfig {
         this.clientSecret = clientSecret;
     }
 
-    public String getToken(HttpServletRequest request){
+    public String getToken(HttpServletRequest request) {
         return request.getHeader(this.getTokenHeader());
     }
 

@@ -16,6 +16,8 @@ import com.mvc.console.vo.TransactionVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -33,7 +35,6 @@ public class TransactionController extends BaseController<TransationService, Tra
     private TransationService transationService;
 
 
-    // 查询我的资金
     @RequestMapping(value = "balance")
     public @ResponseBody
     Result<List<CapitalVO>> getBalance() {
@@ -42,7 +43,6 @@ public class TransactionController extends BaseController<TransationService, Tra
         return ResultGenerator.genSuccessResult(result);
     }
 
-    // 查询我的资金记录
     @RequestMapping(value = "list")
     public @ResponseBody
     Result<PageInfo> transactionList(TransactionDTO transactionDTO) {
@@ -53,23 +53,20 @@ public class TransactionController extends BaseController<TransationService, Tra
         return ResultGenerator.genSuccessResult(pageInfo);
     }
 
-    // 提现
     @RequestMapping(value = "withdraw", method = RequestMethod.POST)
     public @ResponseBody
-    Result withdraw(@RequestBody WithdrawDTO withdrawDTO, @RequestHeader("Authorization") String Authorization) {
+    Result withdraw(@RequestBody @Valid WithdrawDTO withdrawDTO, @RequestHeader("Authorization") String Authorization) throws UnsupportedEncodingException {
         transationService.withdraw(withdrawDTO, Authorization);
         return ResultGenerator.genSuccessResult();
     }
 
-    // 存入
     @RequestMapping(value = "deposite", method = RequestMethod.POST)
     public @ResponseBody
-    Result deposite(@RequestBody DepositeDTO depositeDTO) {
+    Result deposite(@RequestBody DepositeDTO depositeDTO) throws UnsupportedEncodingException {
         transationService.deposite(depositeDTO);
         return ResultGenerator.genSuccessResult();
     }
 
-    // 查询当日已提现金额
     @RequestMapping(value = "balance/cost")
     public @ResponseBody
     Result<Double> surplus(@RequestParam("type") String type) {

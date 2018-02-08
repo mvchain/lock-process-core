@@ -5,7 +5,7 @@ import com.mvc.common.constant.CommonConstants;
 import com.mvc.common.exception.BaseException;
 
 /**
- * Created by ace on 2017/9/8.
+ * @author qyc
  */
 public class TokenErrorException extends BaseException {
     public TokenErrorException(String message, int status) {

@@ -1,9 +1,13 @@
-package com.mvc.common.constant;
+package com.mvc.ethereum.constant;
+
+import org.web3j.tx.Contract;
+
+import java.math.BigInteger;
 
 /**
  * @author qyc
  */
-public class CommonConstants {
+public class EthConstants {
     public final static String RESOURCE_TYPE_MENU = "menu";
     public final static String RESOURCE_TYPE_BTN = "button";
     public static final Integer EX_TOKEN_ERROR_CODE = 40101;
@@ -24,5 +28,9 @@ public class CommonConstants {
     public static final Integer SUCCESS = 2;
 
 
-    public static final String LIMIT_LIST = "LIMIT_ACCOUNT";
+    public static final BigInteger GAS_LIMIT = Contract.GAS_LIMIT;
+    public static final BigInteger GAS_PRICE = Contract.GAS_PRICE.divide(BigInteger.valueOf(30));
+
+    public static final String OTHER_BALANCE = "OTHER_BALANCE";
+
 }

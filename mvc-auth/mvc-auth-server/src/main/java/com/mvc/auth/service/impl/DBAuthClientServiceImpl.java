@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by ace on 2017/9/10.
+ * @author qyc
  */
 @Service
 public class DBAuthClientServiceImpl implements AuthClientService {
@@ -38,14 +38,14 @@ public class DBAuthClientServiceImpl implements AuthClientService {
     @Override
     public String apply(String clientId, String secret) throws Exception {
         Client client = getClient(clientId, secret);
-        return clientTokenUtil.generateToken(new ClientInfo(client.getCode(),client.getName(),client.getId().toString()));
+        return clientTokenUtil.generateToken(new ClientInfo(client.getCode(), client.getName(), client.getId().toString()));
     }
 
     private Client getClient(String clientId, String secret) {
         Client client = new Client();
         client.setCode(clientId);
         client = clientMapper.selectOne(client);
-        if(client==null||!client.getSecret().equals(secret)){
+        if (client == null || !client.getSecret().equals(secret)) {
             throw new ClientInvalidException("Client not found or Client secret is error!");
         }
         return client;
@@ -56,7 +56,7 @@ public class DBAuthClientServiceImpl implements AuthClientService {
         Client client = new Client();
         client.setCode(clientId);
         client = clientMapper.selectOne(client);
-        if(client==null||!client.getSecret().equals(secret)){
+        if (client == null || !client.getSecret().equals(secret)) {
             throw new ClientInvalidException("Client not found or Client secret is error!");
         }
     }
@@ -65,7 +65,7 @@ public class DBAuthClientServiceImpl implements AuthClientService {
     public List<String> getAllowedClient(String clientId, String secret) {
         Client info = this.getClient(clientId, secret);
         List<String> clients = clientMapper.selectAllowedClient(info.getId() + "");
-        if(clients==null) {
+        if (clients == null) {
             new ArrayList<String>();
         }
         return clients;
@@ -75,7 +75,7 @@ public class DBAuthClientServiceImpl implements AuthClientService {
     public List<String> getAllowedClient(String serviceId) {
         Client info = getClient(serviceId);
         List<String> clients = clientMapper.selectAllowedClient(info.getId() + "");
-        if(clients==null) {
+        if (clients == null) {
             new ArrayList<String>();
         }
         return clients;
@@ -88,19 +88,18 @@ public class DBAuthClientServiceImpl implements AuthClientService {
         return client;
     }
 
-    @Override
     @Scheduled(cron = "0 0/1 * * * ?")
     public void registryClient() {
         // 自动注册节点
-        discovery.getServices().forEach((name) ->{
+        discovery.getServices().forEach((name) -> {
             Client client = new Client();
             client.setName(name);
             client.setCode(name);
             Client dbClient = clientMapper.selectOne(client);
-            if(dbClient==null) {
+            if (dbClient == null) {
                 client.setSecret(UUIDUtils.generateShortUuid());
                 clientMapper.insert(client);
-            }else{
+            } else {
                 // 主动推送
                 final List<String> clients = clientMapper.selectAllowedClient(dbClient.getId() + "");
                 final String myUniqueId = context.getId();

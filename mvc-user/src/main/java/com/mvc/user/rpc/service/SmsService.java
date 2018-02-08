@@ -16,7 +16,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
  */
 @FeignClient("mvc-sms")
 public interface SmsService {
-
+    /**
+     * checkSms
+     * @param mobileValiDTO
+     * @return
+     */
     @RequestMapping(value="/sms/code/validate",method = RequestMethod.POST)
     ResponseEntity<Boolean> checkSms(@RequestBody MobileValiDTO mobileValiDTO);
 
