@@ -24,10 +24,8 @@ mods/
 
 # IDEA
 *.iml
-*/*.iml
 .idea/
 .DS_Store
 local.*
 
 application.yml
-*/application.yml
