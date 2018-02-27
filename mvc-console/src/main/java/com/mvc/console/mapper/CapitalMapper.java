@@ -33,4 +33,16 @@ public interface CapitalMapper extends Mapper<Capital> {
      */
     @Update("update capital set locked = locked + #{quantity}, interest = interest + #{interest} where user_id = #{userId} and coin_id = #{coinId}")
     void updateValue(@Param("quantity") BigInteger quantity, @Param("userId") BigInteger userId, @Param("coinId") BigInteger coinId, @Param("interest") BigInteger interest);
+
+    /**
+     * updateBalance
+     *
+     * @param coinId
+     * @param userId
+     * @param value
+     * @return
+     */
+    @Update("update capital set balance = ( balance + #{value} ) where coin_id = #{coinId} and user_id = #{userId}")
+    Integer updateBalance(@Param("coinId") BigInteger coinId, @Param("userId") BigInteger userId, @Param("value") BigInteger value);
+
 }

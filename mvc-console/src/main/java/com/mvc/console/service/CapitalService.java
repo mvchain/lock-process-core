@@ -34,4 +34,8 @@ public class CapitalService extends BaseBiz<CapitalMapper,Capital> {
     public void updateValue(BigInteger quantity, BigInteger userId, BigInteger coinId, BigInteger interest) {
         capitalMapper.updateValue(quantity, userId, coinId, interest);
     }
+
+    public void updateBalance(BigInteger coinId, BigInteger userId, BigInteger value) {
+        capitalMapper.updateBalance(coinId, userId, value);
+    }
 }

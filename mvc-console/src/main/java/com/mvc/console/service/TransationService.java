@@ -96,14 +96,17 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
         Transaction transaction = new Transaction();
         transaction.setId(id);
         transaction.setTxHash(result.getData().toString());
+        transaction.setStatus(1);
         transactionMapper.updateByPrimaryKeySelective(transaction);
+        capitalService.updateBalance(transaction.getCoinId(), transaction.getUserId(), BigInteger.ZERO.subtract(transaction.getQuantity()));
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public BigInteger insertTrans(WithdrawDTO withdrawDTO, String authorization, Result<JSONObject> account) throws UnsupportedEncodingException {
         Long seq = redisTemplate.opsForValue().increment("TRANSATION_C", 1);
+        BigInteger fee = ConfigUtil.withdrawConfigMap.get(withdrawDTO.getType()).getPoundageValue(withdrawDTO.getValue(), withdrawDTO.getType());
         Transaction transaction = new Transaction();
-        transaction.setActualQuantity(CoinUtil.Value2wei(withdrawDTO.getValue(), withdrawDTO.getType()));
+        transaction.setActualQuantity(CoinUtil.Value2wei(withdrawDTO.getValue(), withdrawDTO.getType()).subtract(fee));
         transaction.setCoinId(CoinUtil.getId(withdrawDTO.getType()));
         transaction.setQuantity(CoinUtil.Value2wei(withdrawDTO.getValue(), withdrawDTO.getType()));
         transaction.setType(1);
