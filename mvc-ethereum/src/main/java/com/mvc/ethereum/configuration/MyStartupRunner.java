@@ -42,6 +42,7 @@ public class MyStartupRunner implements CommandLineRunner {
         log.info("transcation start listen");
         Observable<org.web3j.protocol.core.methods.response.Log> ob = web3j.ethLogObservable(filter);
         while (true) {
+            Thread.sleep(1);
             if (null == sub || sub.isUnsubscribed()) {
                 sub = getSubscription(ob);
             }

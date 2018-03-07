@@ -251,6 +251,29 @@ public class RpcServiceImpl implements RpcService {
         return jsonObject;
     }
 
+    @Override
+    public void reTransaction() {
+        com.mvc.ethereum.model.Transaction transaction = transationService.selectWaitTrans(BigInteger.ZERO);
+        while (null != transaction) {
+            try {
+                EthGetTransactionReceipt tx = web3j.ethGetTransactionReceipt(transaction.getTxHash()).send();
+                if ("0x0".equals(tx.getTransactionReceipt().get().getStatus())) {
+                    continue;
+                }
+                String type = CoinUtil.coinMap.get(transaction.getCoinId()).getAbbr();
+                Transaction trans = buildTransaction(transaction.getToAddress(), transaction.getFromAddress(), transaction.getActualQuantity());
+                Object result = eth_sendTransaction(trans, walletConfig.getPass(type, null), walletConfig.getAddress(type));
+                if (null != result) {
+                    transaction.setTxHash(result.toString());
+                    transationService.update(transaction);
+                }
+                transaction = transationService.selectWaitTrans(transaction.getId());
+            } catch (Exception e) {
+                continue;
+            }
+        }
+    }
+
     private Transaction buildTransaction(String to, String from, BigInteger value) throws Exception {
         Transaction transaction = new Transaction(
                 from,

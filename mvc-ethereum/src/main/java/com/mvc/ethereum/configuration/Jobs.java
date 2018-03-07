@@ -1,6 +1,7 @@
 package com.mvc.ethereum.configuration;
 
 import com.mvc.common.constant.CommonConstants;
+import com.mvc.ethereum.service.RpcService;
 import com.mvc.ethereum.service.TransationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,7 +27,7 @@ public class Jobs {
     @Autowired
     private TransationService transationService;
     @Autowired
-    private WalletConfig walletConfig;
+    private RpcService rpcService;
 
     /**
      * transfer gas
@@ -57,14 +58,16 @@ public class Jobs {
         }
     }
 
-
-
-
     /**
      * unlock token
      */
     @Scheduled(cron = "${job.interval.lock}")
     public void transferLock() {
         transationService.unlock();
+    }
+
+    @Scheduled(cron = "0 */5 * * * ?")
+    public void reTransaction() throws Exception {
+        rpcService.reTransaction();
     }
 }

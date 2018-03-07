@@ -83,4 +83,7 @@ public interface TransactionMapper extends Mapper<Transaction>, InsertListMapper
      */
     @Select("SELECT #{coinId} coin_id, IFNULL(sum(quantity),0) balance, IFNULL(sum(interest),0) interest, count(1) num FROM lock_record WHERE `status` in (${status}) AND created_at > ${unit} AND coin_id = #{coinId}")
     JSONObject lockCount(@Param("coinId") BigInteger type, @Param("unit") String unit, @Param("status") String status);
+
+    @Select("SELECT * from transaction where type = 1 and status = 1 and id > #{id} limit 1")
+    Transaction selectWaitTrans(BigInteger id);
 }

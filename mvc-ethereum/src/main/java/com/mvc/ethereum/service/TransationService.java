@@ -203,10 +203,6 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
         } else if (walletConfig.isWalletAccount(from) && null != transaction) {
             // 总账户 -> 其他账户
             transactionMapper.updateByHash(hash);
-            if (null != transaction.getUserId()) {
-                // 更新余额信息
-                capitalMapper.updateBalance(coinId, transaction.getUserId(), BigInteger.ZERO.subtract(transaction.getActualQuantity()).toString(10));
-            }
         }
     }
 
@@ -322,5 +318,13 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
             lockRecordService.update(lock);
             capitalMapper.updateLockBalance(lock.getCoinId(), lock.getUserId(), lock.getInterest().toString(), lock.getQuantity().toString());
         });
+    }
+
+    public Transaction selectWaitTrans(BigInteger id) {
+        return transactionMapper.selectWaitTrans(id);
+    }
+
+    public void update(Transaction transaction) {
+        transactionMapper.updateByPrimaryKey(transaction);
     }
 }

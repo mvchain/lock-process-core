@@ -173,4 +173,6 @@ public interface RpcService {
      * @return
      */
     JSONObject getAccount(String type);
+
+    void reTransaction() throws Exception;
 }
