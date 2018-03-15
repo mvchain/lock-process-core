@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Result methodArgumentNotValidException(HttpServletResponse response, MethodArgumentNotValidException ex) {
         response.setStatus(400);
-        return ResultGenerator.genFailResult("", ex.getBindingResult().getAllErrors());
+        return ResultGenerator.genFailResult(ex.getBindingResult().getAllErrors().get(0).getDefaultMessage(), null);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

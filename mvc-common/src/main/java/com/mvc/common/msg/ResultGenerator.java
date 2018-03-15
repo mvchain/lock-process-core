@@ -35,4 +35,10 @@ public class ResultGenerator {
                 .setMessage(message)
                 .setData(data);
     }
+
+    public static Result genFailResult(Integer code, String message) {
+        return new Result()
+                .setCode(code)
+                .setMessage(message);
+    }
 }
