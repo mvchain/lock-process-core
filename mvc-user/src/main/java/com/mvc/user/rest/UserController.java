@@ -102,7 +102,7 @@ public class UserController extends BaseController<UserService,User> {
     Result<PageInfo<UserVO>> getList(@RequestParam Map<String, Object> params){
         //查询列表数据
         Query query = new Query(params);
-        return ResultGenerator.genSuccessResult(userService.list(query));
+        return ResultGenerator.genSuccessResult(userService.list(query, (String)params.get("cellphone")));
     }
 
     @RequestMapping(value = "ethnumKey", method = RequestMethod.GET)

@@ -168,10 +168,9 @@ public class UserService extends BaseBiz<UserMapper, User> {
         return user.getAddressEth();
     }
 
-    public PageInfo<UserVO> list(Query query) {
+    public PageInfo<UserVO> list(Query query, String cellphone) {
         PageHelper.startPage(query.getPage(), query.getLimit());
-        String sellPhone = (String) query.get("cellphone");
-        List<UserVO> list = userMapper.list(sellPhone);
+        List<UserVO> list = userMapper.list(cellphone);
         list.stream().forEach(user -> {
             Capital capital = new Capital();
             capital.setUserId(user.getId());
