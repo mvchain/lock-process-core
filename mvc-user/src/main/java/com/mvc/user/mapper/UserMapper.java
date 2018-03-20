@@ -3,6 +3,7 @@ package com.mvc.user.mapper;
 import com.mvc.user.dto.UserDTO;
 import com.mvc.user.entity.User;
 import com.mvc.user.vo.UserVO;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import tk.mybatis.mapper.common.Mapper;
 
@@ -39,10 +40,10 @@ public interface UserMapper extends Mapper<User> {
             "SELECT * FROM `user`",
             "WHERE 1 = 1",
             "<when test=\"cellphone!=null and cellphone !=''\">",
-            "AND cellphone = #{cellPhone}",
+            "AND cellphone = #{cellphone}",
             "</when>",
             "</script>"})
-    List<UserVO> list(String cellphone);
+    List<UserVO> list(@Param("cellphone") String cellphone);
 
     /**
      * selectNullAddr
