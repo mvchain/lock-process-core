@@ -18,6 +18,7 @@ import com.mvc.user.rpc.service.AuthService;
 import com.mvc.user.rpc.service.EthernumRest;
 import com.mvc.user.rpc.service.SmsService;
 import com.mvc.user.util.CoinUtil;
+import com.mvc.user.util.Utils;
 import com.mvc.user.vo.UserVO;
 import io.jsonwebtoken.lang.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,12 +70,19 @@ public class UserService extends BaseBiz<UserMapper, User> {
         mobileValiDTO.setValiCode(user.getValiCode());
         ResponseEntity<Boolean> checkResult = smsService.checkSms(mobileValiDTO);
         Assert.isTrue(checkResult.getBody(), "验证码错误");
+        user.setPassword(getPassword(user.getPassword()));
         User userBean = user;
         userBean.init();
         insertSelective(userBean);
         // 插入初始数据
         insertDefaultBalance(userBean);
         return userBean;
+    }
+
+    private String getPassword(String pwd) {
+        String password = pwd.replaceAll("([';])+|(--)+", "");
+        password = Utils.toSHA(Utils.toSHA(Utils.toMD5(Utils.toSHA(Utils.toMD5(password)))));
+        return password;
     }
 
     private void insertDefaultBalance(User userBean) {
@@ -111,6 +119,7 @@ public class UserService extends BaseBiz<UserMapper, User> {
 
     public String login(HttpSession session, UserDTO userDTO) throws Exception {
         Assert.isTrue(userDTO.getValiCode().equalsIgnoreCase(session.getAttribute("imageCode") + ""), "验证码不正确！");
+        userDTO.setPassword(getPassword(userDTO.getPassword()));
         User user = userMapper.selectUserByPwd(userDTO);
         Assert.notNull(user, "用户名或密码错误");
         Assert.isTrue(user.getStatus() == 1, "用户已停用");
@@ -127,21 +136,23 @@ public class UserService extends BaseBiz<UserMapper, User> {
         Assert.isTrue(checkResult.getBody(), "验证码错误");
         User user = userMapper.selectUserByPhone(userDTO);
         Assert.notNull(user, "用户不存在");
-        user.setPassword(userDTO.getPassword());
+        user.setPassword(getPassword(userDTO.getPassword()));
         updateSelectiveById(user);
         Result<String> result = authService.createUserAuthenticationToken(new TokenDTO(user.getCellphone(), clientId, user.getId(), user.getAddressEth()));
         return result.getData();
     }
 
     public String updatePwd(UpdateDTO userDTO) throws UnsupportedEncodingException {
+        userDTO.setPassword(getPassword(userDTO.getPassword()));
         User user = userMapper.selectUserByPwd(userDTO);
         Assert.notNull(user, "用户名或密码错误");
-        user.setPassword(userDTO.getNewPassword());
+        user.setPassword(getPassword(userDTO.getNewPassword()));
         updateSelectiveById(user);
         return "success";
     }
 
     public String updatePhone(UpdatePhoneDTO updatePhoneDTO) throws UnsupportedEncodingException {
+        updatePhoneDTO.setPassword(getPassword(updatePhoneDTO.getPassword()));
         User user = userMapper.selectUserByPwd(updatePhoneDTO);
         Assert.notNull(user, "用户名或密码错误");
         user.setCellphone(updatePhoneDTO.getNewCellPhone());
@@ -159,7 +170,8 @@ public class UserService extends BaseBiz<UserMapper, User> {
 
     public PageInfo<UserVO> list(Query query) {
         PageHelper.startPage(query.getPage(), query.getLimit());
-        List<UserVO> list = userMapper.list();
+        String sellPhone = (String) query.get("cellphone");
+        List<UserVO> list = userMapper.list(sellPhone);
         list.stream().forEach(user -> {
             Capital capital = new Capital();
             capital.setUserId(user.getId());

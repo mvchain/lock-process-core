@@ -35,8 +35,14 @@ public interface UserMapper extends Mapper<User> {
      *
      * @return
      */
-    @Select("SELECT * FROM `user`")
-    List<UserVO> list();
+    @Select({"<script>",
+            "SELECT * FROM `user`",
+            "WHERE 1 = 1",
+            "<when test=\"cellphone!=null and cellphone !=''\">",
+            "AND cellphone = #{cellPhone}",
+            "</when>",
+            "</script>"})
+    List<UserVO> list(String cellphone);
 
     /**
      * selectNullAddr
