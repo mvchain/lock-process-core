@@ -79,7 +79,7 @@ public class UserService extends BaseBiz<UserMapper, User> {
         return userBean;
     }
 
-    private String getPassword(String pwd) {
+    public String getPassword(String pwd) {
         String password = pwd.replaceAll("([';])+|(--)+", "");
         password = Utils.toSHA(Utils.toSHA(Utils.toMD5(Utils.toSHA(Utils.toMD5(password)))));
         return password;

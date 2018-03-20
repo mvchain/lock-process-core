@@ -121,6 +121,9 @@ public class UserController extends BaseController<UserService,User> {
     @Override
     @ResponseBody
     public ObjectRestResponse<User> update(@RequestBody User entity) throws UnsupportedEncodingException {
+        if (entity.getPassword() != null) {
+            entity.setPassword(userService.getPassword(entity.getPassword()));
+        }
         super.update(entity);
         User user = userService.selectById(entity.getId());
         if (null != user) {
