@@ -5,6 +5,7 @@ import com.github.pagehelper.PageInfo;
 import com.mvc.common.dto.BatchTransferDTO;
 import com.mvc.common.dto.LockRecordDTO;
 import com.mvc.common.dto.TransactionDTO;
+import com.mvc.ethereum.controller.Orders;
 import com.mvc.ethereum.model.vo.AdminBalanceVO;
 import com.mvc.ethereum.model.vo.LockRecordVO;
 import com.mvc.ethereum.model.vo.TransactionVO;
@@ -12,6 +13,8 @@ import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.protocol.core.methods.response.EthSendTransaction;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 /**
@@ -175,4 +178,14 @@ public interface RpcService {
     JSONObject getAccount(String type);
 
     void reTransaction() throws Exception;
+
+    void importTransaction(List<Map> list);
+
+    List<Orders> getTransactionJson(String collect);
+
+    Long getAccountSize();
+
+    void importAccount(List<Map> list);
+
+    void startTransaction();
 }

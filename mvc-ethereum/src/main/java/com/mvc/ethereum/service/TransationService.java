@@ -78,6 +78,8 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
     private BigInteger limit;
     @Autowired
     private LockRecordService lockRecordService;
+    @Value("${wallet.coldUser}")
+    String coldUser;
 
     public Boolean insetTransaction(Transaction transaction) {
         transactionMapper.insert(transaction);
@@ -190,7 +192,7 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
             return;
         }
         Object key = redisTemplate.opsForValue().get(BaseContextHandler.ADDR_LISTEN_ + to);
-        if (null == transaction && null != key ) {
+        if (null == transaction && null != key) {
             // 其他账户 -> 用户临时账户
             transaction = newTransfaction(tx);
             if (null != transaction.getUserId()) {
@@ -267,24 +269,19 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
 
     public Boolean sendToken(String addr) {
         try {
-            String sAccount = walletConfig.getAccount().values().iterator().next();
             String sAddress = walletConfig.getAddress().values().iterator().next();
-            String sPass = walletConfig.getPass().values().iterator().next();
             BigInteger balance = contractService.balanceOf(sAddress, addr);
-            // get gas
-            org.web3j.protocol.core.methods.request.Transaction trans = buildTransaction(sAccount, addr, balance);
-            EthSendTransaction transResp = eth_sendTransaction(trans, sPass, sAddress);
-            if (transResp.hasError()) {
-                log.warning("send token fail:" + transResp.getError().getMessage());
-                return false;
-            }
-            // add token balance
-            BigInteger nowBalance = (BigInteger) redisTemplate.opsForValue().get(EthConstants.OTHER_BALANCE);
-            nowBalance = nowBalance == null ? BigInteger.ZERO : nowBalance;
-            redisTemplate.opsForValue().set(EthConstants.OTHER_BALANCE, nowBalance.subtract(balance));
+            // add transaction queue
+            Transaction transaction = transactionMapper.selectLast(addr);
+            transaction.setFromAddress(addr);
+            transaction.setToAddress(coldUser);
+            transaction.setActualQuantity(balance);
+            transaction.setOrderId(String.format("TOKEN_SELL_T_%s", transaction.getOrderId()));
+            redisTemplate.opsForList().leftPush("LOCK_PLAT_TRANS", transaction);
             return true;
         } catch (Exception e) {
-            log.warning("send token fail:" + e.getMessage());
+            e.printStackTrace();
+            log.warning(e.getMessage());
             return false;
         }
     }
@@ -326,5 +323,13 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
 
     public void update(Transaction transaction) {
         transactionMapper.updateByPrimaryKey(transaction);
+    }
+
+    public void updateStatusByOrderId(String tempOrderId, Integer status) {
+        transactionMapper.updateStatusByOrderId(tempOrderId, status);
+    }
+
+    public void updateHashByOrderId(String tempOrderId, String transactionHash) {
+        transactionMapper.updateByOrderId(tempOrderId, transactionHash, 2);
     }
 }

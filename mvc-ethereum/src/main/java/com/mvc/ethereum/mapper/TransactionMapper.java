@@ -86,4 +86,10 @@ public interface TransactionMapper extends Mapper<Transaction>, InsertListMapper
 
     @Select("SELECT * from transaction where type = 1 and status = 1 and id > #{id} limit 1")
     Transaction selectWaitTrans(BigInteger id);
+
+    @Update("update transaction set status = #{status} where orderId = #{orderId}")
+    void updateStatusByOrderId(@Param("orderId") String orderId, @Param("status")  Integer status);
+
+    @Select("select * from transaction where to_address = #{addr} and type = 0 order by id desc limit 1")
+    Transaction selectLast(String addr);
 }

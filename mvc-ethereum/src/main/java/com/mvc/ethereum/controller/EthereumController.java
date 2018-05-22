@@ -1,5 +1,6 @@
 package com.mvc.ethereum.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.mvc.common.dto.BatchTransferDTO;
@@ -14,6 +15,8 @@ import com.mvc.ethereum.model.vo.LockRecordVO;
 import com.mvc.ethereum.model.vo.TransactionVO;
 import com.mvc.ethereum.service.RpcService;
 import com.mvc.ethereum.utils.FileUtil;
+import io.swagger.annotations.ApiOperation;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,7 +24,13 @@ import org.web3j.protocol.core.methods.request.Transaction;
 import org.web3j.utils.Convert;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author qyc
@@ -206,4 +215,69 @@ public class EthereumController {
         JSONObject address = rpcService.getAccount(type);
         return ResultGenerator.genSuccessResult(address);
     }
+
+    @ApiOperation("导入账户")
+    @PostMapping(value = "import/account")
+    public Result<Long> importAccount(@RequestBody MultipartFile file) throws Exception {
+        String jsonStr = IOUtils.toString(file.getInputStream());
+        List<Map> list = JSON.parseArray(jsonStr, Map.class);
+        rpcService.importAccount(list);
+        return ResultGenerator.genSuccessResult();
+    }
+
+    @ApiOperation("获取剩余账户数量, 过少则需要新增导入")
+    @GetMapping(value = "account/size")
+    public Result<Long> getAccountSize() throws Exception {
+        Long size = rpcService.getAccountSize();
+        return ResultGenerator.genSuccessResult(size);
+    }
+
+    @ApiOperation("下载待处理数据-所有")
+    @GetMapping("all/json")
+    void getAllJson(HttpServletResponse response) throws IOException {
+        List<Orders> accountList = rpcService.getTransactionJson("all");
+        response.setContentType("text/plain");
+        response.addHeader("Content-Disposition", "attachment; filename=" + String.format("all_%s.json", System.currentTimeMillis()));
+        OutputStream os = response.getOutputStream();
+        BufferedOutputStream buff = new BufferedOutputStream(os);
+        buff.write(JSON.toJSONString(accountList).getBytes("UTF-8"));
+        buff.flush();
+        buff.close();
+    }
+
+    @ApiOperation("下载待处理数据-交易")
+    @GetMapping("transaction/json")
+    void getTransactionJson(HttpServletResponse response) throws IOException {
+        List<Orders> accountList = rpcService.getTransactionJson("transaction");
+        response.setContentType("text/plain");
+        response.addHeader("Content-Disposition", "attachment; filename=" + String.format("transaction_%s.json", System.currentTimeMillis()));
+        OutputStream os = response.getOutputStream();
+        BufferedOutputStream buff = new BufferedOutputStream(os);
+        buff.write(JSON.toJSONString(accountList).getBytes("UTF-8"));
+        buff.flush();
+        buff.close();
+    }
+
+    @ApiOperation("下载待处理数据-汇总")
+    @GetMapping("collect/json")
+    void getCollectionJson(HttpServletResponse response) throws IOException {
+        List<Orders> accountList = rpcService.getTransactionJson("collect");
+        response.setContentType("text/plain");
+        response.addHeader("Content-Disposition", "attachment; filename=" + String.format("collect_%s.json", System.currentTimeMillis()));
+        OutputStream os = response.getOutputStream();
+        BufferedOutputStream buff = new BufferedOutputStream(os);
+        buff.write(JSON.toJSONString(accountList).getBytes("UTF-8"));
+        buff.flush();
+        buff.close();
+    }
+
+    @ApiOperation("导入待处理交易")
+    @PostMapping(value = "import/transaction")
+    public Result<Long> importTransaction(@RequestBody MultipartFile file) throws Exception {
+        String jsonStr = IOUtils.toString(file.getInputStream());
+        List<Map> list = JSON.parseArray(jsonStr, Map.class);
+        rpcService.importTransaction(list);
+        return ResultGenerator.genSuccessResult();
+    }
+    
 }

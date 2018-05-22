@@ -9,12 +9,14 @@ import com.mvc.common.dto.TransactionDTO;
 import com.mvc.common.dto.TransferDTO;
 import com.mvc.ethereum.configuration.WalletConfig;
 import com.mvc.ethereum.constant.EthConstants;
+import com.mvc.ethereum.controller.Orders;
 import com.mvc.ethereum.model.JsonCredentials;
 import com.mvc.ethereum.model.TransactionResponse;
 import com.mvc.ethereum.model.vo.AdminBalanceVO;
 import com.mvc.ethereum.model.vo.LockRecordVO;
 import com.mvc.ethereum.model.vo.TransactionVO;
 import com.mvc.ethereum.utils.CoinUtil;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -22,6 +24,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
 import org.web3j.abi.FunctionEncoder;
 import org.web3j.abi.TypeReference;
@@ -45,16 +48,15 @@ import org.web3j.protocol.core.methods.response.*;
 import org.web3j.protocol.geth.Geth;
 import org.web3j.quorum.Quorum;
 import org.web3j.quorum.methods.request.PrivateTransaction;
+import org.web3j.utils.Convert;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import static org.web3j.tx.Contract.GAS_LIMIT;
 import static org.web3j.utils.Convert.Unit;
@@ -63,6 +65,7 @@ import static org.web3j.utils.Convert.fromWei;
 /**
  * @author qyc
  */
+@Log
 @Component
 public class RpcServiceImpl implements RpcService {
     @Autowired
@@ -87,6 +90,11 @@ public class RpcServiceImpl implements RpcService {
     private LockRecordService lockRecordService;
     @Autowired
     private ContractService contractService;
+
+    final static String LOCK_PLAT_TRANS_TEMP = "LOCK_PLAT_TRANS_TEMP";
+    final static String LOCK_PLAT_TRANS = "LOCK_PLAT_TRANS";
+    final static String LOCK_PLAT_USER = "LOCK_PLAT_USER";
+    final static String LOCK_PLAT_TRANS_LIST = "LOCK_PLAT_TRANS_LIST";
 
     @Override
     public Object eth_personalByKeyDate(String source, String passhphrase) throws Exception {
@@ -195,7 +203,6 @@ public class RpcServiceImpl implements RpcService {
     @Override
     public void insertBatch(BatchTransferDTO batchTransferDTO) throws Exception {
         // 同步批量插入
-        ;
         List<com.mvc.ethereum.model.Transaction> transactions = new ArrayList<>(batchTransferDTO.getTransferDTOS().size());
         for (int i = 0; i < batchTransferDTO.getTransferDTOS().size(); i++) {
             TransferDTO transferDTO = batchTransferDTO.getTransferDTOS().get(i);
@@ -286,4 +293,140 @@ public class RpcServiceImpl implements RpcService {
         );
         return transaction;
     }
+
+
+    public void importAccount(List<Map> list) {
+        List accounts = redisTemplate.opsForList().range(LOCK_PLAT_USER, 0, redisTemplate.opsForList().size(LOCK_PLAT_USER));
+        list.stream().forEach(map -> {
+            String address = (String) map.get("address");
+            if (null != accounts && accounts.contains(address)) {
+                return;
+            }
+            redisTemplate.opsForList().leftPush(LOCK_PLAT_USER, address);
+        });
+    }
+
+    public Long getAccountSize() {
+        String key = LOCK_PLAT_USER;
+        return redisTemplate.opsForList().size(key);
+    }
+
+    public List<Orders> getTransactionJson(String type) {
+        final String startWith = getStartWith(type);
+        String tempKey = LOCK_PLAT_TRANS_TEMP;
+        String key = LOCK_PLAT_TRANS;
+        List<Orders> result = new ArrayList<>();
+        getTransactionsTemp(tempKey, key, result);
+        List<com.mvc.ethereum.model.Transaction> transactionsTemp;
+        java.util.function.Function<Orders, BigInteger> comparator = Orders::getNonce;
+        Comparator<Orders> byNonce = Comparator.comparing(comparator);
+        transactionsTemp = redisTemplate.opsForList().range(tempKey, 0, redisTemplate.opsForList().size(tempKey));
+        redisTemplate.delete(tempKey);
+        List<com.mvc.ethereum.model.Transaction> tempList = transactionsTemp.stream().filter(obj -> obj.getOrderId().indexOf(startWith) < 0).collect(Collectors.toList());
+        if (!CollectionUtils.isEmpty(tempList)) {
+            redisTemplate.opsForList().leftPushAll(tempKey, tempList);
+        }
+        result = result.stream().filter(obj -> obj.getOrderId().indexOf(startWith) >= 0).distinct().sorted(byNonce).collect(Collectors.toList());
+        return result;
+    }
+
+    private void getTransactionsTemp(String tempKey, String key, List<Orders> result) {
+        List<com.mvc.ethereum.model.Transaction> transactionsTemp = redisTemplate.opsForList().range(tempKey, 0, redisTemplate.opsForList().size(tempKey));
+        if (null == transactionsTemp) {
+            transactionsTemp = new ArrayList<>();
+        }
+        for (com.mvc.ethereum.model.Transaction transaction : transactionsTemp) {
+            Orders orders = getOrders(transaction);
+            if (orders.getValue().compareTo(BigDecimal.ZERO) > 0) {
+                result.add(orders);
+            }
+        }
+        while (redisTemplate.opsForList().size(key) > 0) {
+            com.mvc.ethereum.model.Transaction transaction = (com.mvc.ethereum.model.Transaction) redisTemplate.opsForList().rightPop(key);
+            redisTemplate.opsForList().leftPush(tempKey, transaction);
+            Orders orders = getOrders(transaction);
+            if (orders.getValue().compareTo(BigDecimal.ZERO) > 0) {
+                result.add(orders);
+            }
+        }
+        Collections.reverse(result);
+        Map<String, Integer> nonceCount = new HashMap<>(result.size());
+        for (int i = 0; i < result.size(); i++) {
+            Orders orders = result.get(i);
+            Integer nonceBase = nonceCount.get(orders.getFromAddress());
+            nonceBase = null == nonceBase ? 0 : nonceBase;
+            orders.setNonce(getNonce(orders.getFromAddress()).add(BigInteger.valueOf(nonceBase)));
+            nonceCount.put(orders.getFromAddress(), nonceBase + 1);
+        }
+    }
+
+    private String getStartWith(String type) {
+        final String startWith;
+        if ("all".equalsIgnoreCase(type)) {
+            startWith = "";
+        } else if ("transaction".equalsIgnoreCase(type)) {
+            startWith = "T_T";
+        } else {
+            startWith = "T_C";
+        }
+        return startWith;
+    }
+
+    private Orders getOrders(com.mvc.ethereum.model.Transaction transaction) {
+        Orders orders = new Orders();
+        orders.setValue(Convert.fromWei(new BigDecimal(transaction.getActualQuantity()), Unit.ETHER));
+        orders.setCreatedAt(transaction.getCreatedAt());
+        orders.setUpdatedAt(transaction.getUpdatedAt());
+        orders.setFromAddress(transaction.getFromAddress());
+        orders.setToAddress(transaction.getToAddress());
+        orders.setTokenType("MVC");
+        if (!transaction.getOrderId().startsWith("LOCK_PLAT_T_")) {
+            orders.setOrderId(String.format("LOCK_PLAT_T_%s", transaction.getOrderId()));
+        } else {
+            orders.setOrderId(transaction.getOrderId());
+        }
+        return orders;
+    }
+
+    public void importTransaction(List<Map> list) {
+        redisTemplate.opsForList().rightPushAll(LOCK_PLAT_TRANS_LIST, list);
+    }
+
+    BigInteger getNonce(String address) {
+        EthGetTransactionCount ethGetTransactionCount = null;
+        try {
+            ethGetTransactionCount = web3j.ethGetTransactionCount(address, DefaultBlockParameterName.LATEST).sendAsync().get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return ethGetTransactionCount.getTransactionCount();
+    }
+
+    public void startTransaction() {
+        try {
+            Map<String, String> map = (Map<String, String>) redisTemplate.opsForList().rightPop(LOCK_PLAT_TRANS_LIST);
+            if (null != map) {
+                String orderId = map.get("orderId");
+                String signature = map.get("signature");
+                EthSendTransaction result = web3j.ethSendRawTransaction(signature).send();
+                String tempOrderId = orderId.replaceAll("LOCK_PLAT_T_", "");
+                if (tempOrderId.startsWith("T")) {
+                    if (result.hasError()) {
+                        log.warning(result.getError().getMessage());
+                        transationService.updateStatusByOrderId(tempOrderId, 9);
+                    } else {
+                        transationService.updateHashByOrderId(tempOrderId, result.getTransactionHash());
+                    }
+                }
+            }
+            Thread.sleep(1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
