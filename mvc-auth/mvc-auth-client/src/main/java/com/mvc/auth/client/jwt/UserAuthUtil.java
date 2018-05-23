@@ -28,13 +28,6 @@ public class UserAuthUtil {
     public IJWTInfo getInfoFromToken(String token) throws Exception {
         try {
             IJWTInfo infoFromToken = JWTHelper.getInfoFromToken(token, userAuthConfig.getPubKeyByte());
-            if (null != redisTemplate) {
-                Integer status = (Integer) redisTemplate.opsForValue().get(CommonConstants.USER_STATUS + infoFromToken.getUniqueName());
-                Boolean checkUser = (null == status || 0 == status) && StringUtils.isNotBlank(infoFromToken.getAddress());
-                if (checkUser) {
-                    throw new TokenErrorException("用户已停用", com.mvc.common.constant.CommonConstants.EX_TOKEN_ERROR_CODE);
-                }
-            }
             return infoFromToken;
         } catch (ExpiredJwtException ex) {
             throw new JwtTokenExpiredException("User token expired!");
