@@ -42,4 +42,13 @@ public class LockRecordService extends BaseBiz<LockRecordMapper, LockRecord> {
     public void update(LockRecord lockRecord) {
         lockRecordMapper.updateByPrimaryKey(lockRecord);
     }
+
+    public void addUnLockRecord(Integer times) {
+        lockRecordMapper.addUnLockRecord(times);
+    }
+
+    public void updateUnlock(Integer times) {
+        lockRecordMapper.updateUnlock();
+        lockRecordMapper.updateUnlockBalance(times);
+    }
 }

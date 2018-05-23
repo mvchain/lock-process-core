@@ -11,7 +11,6 @@ import com.mvc.ethereum.configuration.WalletConfig;
 import com.mvc.ethereum.constant.EthConstants;
 import com.mvc.ethereum.mapper.CapitalMapper;
 import com.mvc.ethereum.mapper.TransactionMapper;
-import com.mvc.ethereum.model.LockRecord;
 import com.mvc.ethereum.model.Transaction;
 import com.mvc.ethereum.model.vo.*;
 import com.mvc.ethereum.utils.CoinUtil;
@@ -307,14 +306,9 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
         }
     }
 
-    public void unlock() {
-        LockRecord lockRecord = new LockRecord();
-        List<LockRecord> list = lockRecordService.selectUnlock();
-        list.stream().forEach(lock -> {
-            lock.setStatus(1);
-            lockRecordService.update(lock);
-            capitalMapper.updateLockBalance(lock.getCoinId(), lock.getUserId(), lock.getInterest().toString(), lock.getQuantity().toString());
-        });
+    public void unlock(Integer times) {
+        lockRecordService.addUnLockRecord(times);
+        lockRecordService.updateUnlock(times);
     }
 
     public Transaction selectWaitTrans(BigInteger id) {

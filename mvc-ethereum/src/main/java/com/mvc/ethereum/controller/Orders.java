@@ -26,13 +26,14 @@ public class Orders {
     private String signature;
     private BigInteger nonce;
 
+
     @Override
     public boolean equals(Object anObject) {
         String o = orderId.startsWith("LOCK_PLAT_T_C") && "ETH".equalsIgnoreCase(tokenType) ? "LOCK_PLAT_T_C" : orderId;
         if (anObject instanceof Orders) {
             Orders obj = (Orders) anObject;
             String ob = obj.orderId.startsWith("LOCK_PLAT_T_C") && "ETH".equalsIgnoreCase(obj.tokenType) ? "LOCK_PLAT_T_C" : obj.orderId;
-            return (o + fromAddress).equals(obj.fromAddress + ob);
+            return (o + toAddress).equals(ob + obj.toAddress);
         }
         return super.equals(anObject);
     }
@@ -40,7 +41,6 @@ public class Orders {
     @Override
     public int hashCode() {
         String o = orderId.startsWith("LOCK_PLAT_T_C") && "ETH".equalsIgnoreCase(tokenType) ? "LOCK_PLAT_T_C" : orderId;
-        return (fromAddress + o).hashCode();
+        return (o + toAddress).hashCode();
     }
-
 }
