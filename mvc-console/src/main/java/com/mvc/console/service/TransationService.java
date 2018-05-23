@@ -85,25 +85,25 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
 
     @Async
     public void sendTrans(WithdrawDTO withdrawDTO, String authorization, BigInteger id, Result<JSONObject> account) {
-        SendTransactionDTO sendTransactionDTO = new SendTransactionDTO();
-        sendTransactionDTO.setPass(account.getData().getString("password"));
-        sendTransactionDTO.setTo(withdrawDTO.getAddress());
-        sendTransactionDTO.setFrom(account.getData().getString("address"));
-        BigInteger fee = ConfigUtil.withdrawConfigMap.get(withdrawDTO.getType()).getPoundageValue(withdrawDTO.getValue(), withdrawDTO.getType());
-        sendTransactionDTO.setValue(CoinUtil.Value2wei(withdrawDTO.getValue(), withdrawDTO.getType()).subtract(fee));
-        Result result = ethernumService.approveAndCall(CoinUtil.getAddress(withdrawDTO.getType()), sendTransactionDTO, authorization);
-        Assert.isTrue(result.getCode() == ResultCode.SUCCESS.code, result.getMessage());
         Transaction transaction = new Transaction();
         transaction.setId(id);
-        transaction.setTxHash(result.getData().toString());
         transaction.setStatus(1);
         transactionMapper.updateByPrimaryKeySelective(transaction);
+        transaction = new Transaction();
+        transaction.setId(id);
+        transaction = transactionMapper.selectByPrimaryKey(transaction);
+        com.mvc.ethereum.model.Transaction trans = new com.mvc.ethereum.model.Transaction();
+        trans.setActualQuantity(transaction.getActualQuantity());
+        trans.setToAddress(transaction.getToAddress());
+        trans.setFromAddress(transaction.getFromAddress());
+        trans.setOrderId(transaction.getOrderId());
+        redisTemplate.opsForList().leftPush("LOCK_PLAT_TRANS", trans);
         capitalService.updateBalance(transaction.getCoinId(), transaction.getUserId(), BigInteger.ZERO.subtract(transaction.getQuantity()));
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     public BigInteger insertTrans(WithdrawDTO withdrawDTO, String authorization, Result<JSONObject> account) throws UnsupportedEncodingException {
-        Long seq = redisTemplate.opsForValue().increment("TRANSATION_C", 1);
+        Long seq = redisTemplate.opsForValue().increment("TRANSATION_T", 1);
         BigInteger fee = ConfigUtil.withdrawConfigMap.get(withdrawDTO.getType()).getPoundageValue(withdrawDTO.getValue(), withdrawDTO.getType());
         Transaction transaction = new Transaction();
         transaction.setActualQuantity(CoinUtil.Value2wei(withdrawDTO.getValue(), withdrawDTO.getType()).subtract(fee));

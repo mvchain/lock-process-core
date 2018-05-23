@@ -14,7 +14,6 @@ import com.mvc.user.service.UserBiz;
 import com.mvc.user.vo.FrontUser;
 import com.mvc.user.vo.MenuTree;
 import io.jsonwebtoken.lang.Assert;
-import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +24,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
- *
  * @author qyc
  * @create 2017-06-08 11:51
  */
@@ -69,7 +67,7 @@ public class UserController extends BaseController<UserBiz, User> {
     @RequestMapping(value = "token", method = RequestMethod.POST)
     public Result<?> createAuthenticationToken(
             @RequestBody JwtAuthenticationRequest authenticationRequest, HttpSession session) throws Exception {
-        boolean result =  StringUtils.equalsIgnoreCase(String.valueOf(session.getAttribute("imageCode")), authenticationRequest.getValiCode());
+        boolean result = StringUtils.equalsIgnoreCase(String.valueOf(session.getAttribute("imageCode")), authenticationRequest.getValiCode());
         Assert.isTrue(result, RestMsgConstants.VALI_IMG_ERR);
         ResponseEntity<JSONObject> resp = authService.createAuthenticationToken(authenticationRequest);
         return ResultGenerator.genSuccessResult(resp.getBody().get("data"));

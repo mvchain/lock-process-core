@@ -2,7 +2,6 @@ package com.mvc.user.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.mvc.api.vo.user.NewAccountDTO;
 import com.mvc.auth.common.constatns.CommonConstants;
 import com.mvc.common.biz.BaseBiz;
 import com.mvc.common.context.BaseContextHandler;
@@ -107,14 +106,13 @@ public class UserService extends BaseBiz<UserMapper, User> {
 
     @Async
     public void updateUserAddress(User user) {
-        // 生成以太坊地址
-        NewAccountDTO newAccountDTO = new NewAccountDTO();
-        newAccountDTO.setPassphrase(ethnumKey);
-        Result<String> addressResp = ethernumRest.personal_newAccount(newAccountDTO);
-        user.setAddressEth(addressResp.getData());
-        // 添加redis事件监听
-        redisTemplate.opsForValue().set(BaseContextHandler.ADDR_LISTEN_ + addressResp.getData(), user.getId());
-        userMapper.updateByPrimaryKeySelective(user);
+        String address = (String) redisTemplate.opsForList().rightPop("LOCK_PLAT_USER");
+        if (null != address) {
+            user.setAddressEth(address);
+            // 添加redis事件监听
+            redisTemplate.opsForValue().set(BaseContextHandler.ADDR_LISTEN_ + address, user.getId());
+            userMapper.updateByPrimaryKeySelective(user);
+        }
     }
 
     public String login(HttpSession session, UserDTO userDTO) throws Exception {

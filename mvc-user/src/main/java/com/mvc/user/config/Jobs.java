@@ -18,7 +18,7 @@ public class Jobs {
     /**
      * update user if the eth address is null
      */
-    @Scheduled(cron = "0 */5 * * * ?")
+    @Scheduled(cron = "*/10 * * * * ?")
     public void updateAddress() {
         userService.updateAddress();
     }

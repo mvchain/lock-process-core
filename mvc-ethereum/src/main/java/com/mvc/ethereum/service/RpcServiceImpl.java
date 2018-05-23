@@ -78,6 +78,8 @@ public class RpcServiceImpl implements RpcService {
     private Quorum quorum;
     @Value("${trans.log.url}")
     String transLogUrl;
+    @Value("${wallet.coldUser}")
+    String coldUser;
     @Autowired
     RestTemplate restTemplate;
     @Autowired
@@ -253,7 +255,7 @@ public class RpcServiceImpl implements RpcService {
     @Override
     public JSONObject getAccount(String type) {
         JSONObject jsonObject = new JSONObject();
-        jsonObject.put("address", walletConfig.getAccount(type));
+        jsonObject.put("address", coldUser);
         jsonObject.put("password", walletConfig.getPass(type, null));
         return jsonObject;
     }
