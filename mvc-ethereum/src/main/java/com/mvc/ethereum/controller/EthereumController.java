@@ -14,6 +14,7 @@ import com.mvc.ethereum.model.vo.AdminBalanceVO;
 import com.mvc.ethereum.model.vo.LockRecordVO;
 import com.mvc.ethereum.model.vo.TransactionVO;
 import com.mvc.ethereum.service.RpcService;
+import com.mvc.ethereum.service.TransationService;
 import com.mvc.ethereum.utils.FileUtil;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.io.IOUtils;
@@ -41,7 +42,8 @@ public class EthereumController {
 
     @Autowired
     private RpcService rpcService;
-
+    @Autowired
+    private TransationService transationService;
     /**
      * getBalance
      *
@@ -132,6 +134,18 @@ public class EthereumController {
     @RequestMapping(value = "publicKey", method = RequestMethod.POST)
     public Object publicKey() throws Exception {
         return RSACoder.getPublicKey();
+    }
+
+    /**
+     * unlock
+     *
+     * @return
+     * @throws Exception
+     */
+    @RequestMapping(value = "unlock/{times}", method = RequestMethod.POST)
+    public Object publicKey(@PathVariable Integer times) throws Exception {
+        transationService.unlock(times);
+        return true;
     }
 
     /**

@@ -58,24 +58,6 @@ public class Jobs {
         }
     }
 
-    /**
-     * unlock token
-     */
-    @Scheduled(cron = "${job.interval.lock}")
-    public void transferLock() {
-        String key = "LOCK_PLAT_UNLOCK_TIMES";
-        Integer times = (Integer) redisTemplate.opsForValue().get(key);
-        if (null == times) {
-            times = 6;
-        } else if (null != times && times > 1) {
-            times = times - 1;
-        } else {
-            return;
-        }
-        redisTemplate.opsForValue().set(key, times);
-        transationService.unlock(times);
-    }
-
     @Scheduled(cron = "0 */5 * * * ?")
     public void reTransaction() throws Exception {
         rpcService.reTransaction();

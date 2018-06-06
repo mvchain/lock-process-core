@@ -49,10 +49,6 @@ public class LockRecordService extends BaseBiz<LockRecordMapper, LockRecord> {
 
     public void updateUnlock(Integer times) {
         lockRecordMapper.updateUnlock();
-        // 第一次解锁一半
-        if(times.equals(6)){
-            times = 2;
-        }
         lockRecordMapper.updateUnlockBalance(times);
     }
 }
