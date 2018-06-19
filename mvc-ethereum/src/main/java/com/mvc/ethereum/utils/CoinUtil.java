@@ -30,7 +30,7 @@ public class CoinUtil {
         BigInteger coinId = getId(type);
         CoinInfo coinInfo = coinMap.get(coinId);
         BigDecimal b = new BigDecimal(balance);
-        Double rslt = b.divide(new BigDecimal(coinInfo.getRatio()), coinInfo.getDigit(), BigDecimal.ROUND_HALF_UP).doubleValue();
+        Double rslt = b.divide(new BigDecimal(coinInfo.getRatio()), coinInfo.getDigit(), BigDecimal.ROUND_DOWN).doubleValue();
         return rslt;
     }
 
