@@ -145,10 +145,7 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
         capital.setUserId(BaseContextHandler.getUserIDInt());
         capital.setCoinId(CoinUtil.getId(withdrawDTO.getType()));
         Capital capitalTemp = capitalService.selectOne(capital);
-        BigInteger max = CoinUtil.Value2wei(ConfigUtil.withdrawConfigMap.get(withdrawDTO.getType()).getMax(), withdrawDTO.getType());
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        BigInteger cost = transactionMapper.costByDay(BaseContextHandler.getUserIDInt(), CoinUtil.getId(withdrawDTO.getType()), df.format(System.currentTimeMillis()));
-        BigInteger balance = capitalTemp.getBalance().subtract(capitalTemp.getLocked());
+        BigInteger balance = capitalTemp.getBalance();
         BigInteger value = CoinUtil.Value2wei(withdrawDTO.getValue(), withdrawDTO.getType());
         Assert.notNull(capital, "余额不足");
         Assert.isTrue(balance.subtract(value).compareTo(BigInteger.ZERO) >= 0, "余额不足");
