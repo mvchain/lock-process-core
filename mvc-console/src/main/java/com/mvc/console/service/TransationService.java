@@ -132,7 +132,7 @@ public class TransationService extends BaseBiz<TransactionMapper, Transaction> {
         mobileValiDTO.setValiCode(withdrawDTO.getValiCode());
         mobileValiDTO.setMobile(BaseContextHandler.getUsername());
         ResponseEntity<Boolean> checkResult = smsService.checkSms(mobileValiDTO);
-        Assert.isTrue(checkResult.getBody(), "验证码错误");
+//        Assert.isTrue(checkResult.getBody(), "验证码错误");
     }
 
     private void checkWithdraw(WithdrawDTO withdrawDTO) {
