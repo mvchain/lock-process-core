@@ -22,7 +22,7 @@ public class CoinUtil {
     public static Double wei2Value(BigInteger coinId, BigInteger balance) {
         CoinInfo coinInfo = coinMap.get(coinId);
         BigDecimal b = new BigDecimal(balance);
-        Double rslt = b.divide(new BigDecimal(coinInfo.getRatio()), coinInfo.getDigit(), BigDecimal.ROUND_HALF_UP).doubleValue();
+        Double rslt = b.divide(new BigDecimal(coinInfo.getRatio()), coinInfo.getDigit(), BigDecimal.ROUND_DOWN).doubleValue();
         return rslt;
     }
 
