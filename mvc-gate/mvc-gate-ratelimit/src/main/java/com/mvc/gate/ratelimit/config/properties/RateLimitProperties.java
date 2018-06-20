@@ -42,14 +42,14 @@ public class RateLimitProperties {
     public static final String PREFIX = "zuul.ratelimit";
 
     private Policy defaultPolicy;
-    @NotNull
+//    @NotNull
     private Map<String, Policy> policies = Maps.newHashMap();
     private boolean behindProxy;
     private boolean enabled;
-    @NotNull
+//    @NotNull
     @Value("${spring.application.name:rate-limit-application}")
     private String keyPrefix;
-    @NotNull
+//    @NotNull
     private Repository repository = Repository.IN_MEMORY;
 
     public enum Repository {
