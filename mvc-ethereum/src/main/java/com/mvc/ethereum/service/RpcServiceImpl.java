@@ -424,9 +424,7 @@ public class RpcServiceImpl implements RpcService {
                 }
             }
             Thread.sleep(1);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
