@@ -419,6 +419,7 @@ public class RpcServiceImpl implements RpcService {
                         log.warning(result.getError().getMessage());
                         transationService.updateStatusByOrderId(tempOrderId, 9);
                     } else {
+                        log.info(String.format("send success, hash is %s", result.getTransactionHash()));
                         transationService.updateHashByOrderId(tempOrderId, result.getTransactionHash());
                     }
                 }
