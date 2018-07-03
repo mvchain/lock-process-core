@@ -322,12 +322,7 @@ public class RpcServiceImpl implements RpcService {
         List<com.mvc.ethereum.model.Transaction> transactionsTemp;
         java.util.function.Function<Orders, BigInteger> comparator = Orders::getNonce;
         Comparator<Orders> byNonce = Comparator.comparing(comparator);
-        transactionsTemp = redisTemplate.opsForList().range(tempKey, 0, redisTemplate.opsForList().size(tempKey));
         redisTemplate.delete(tempKey);
-        List<com.mvc.ethereum.model.Transaction> tempList = transactionsTemp.stream().filter(obj -> obj.getOrderId().indexOf(startWith) < 0).collect(Collectors.toList());
-        if (!CollectionUtils.isEmpty(tempList)) {
-            redisTemplate.opsForList().leftPushAll(tempKey, tempList);
-        }
         result = result.stream().filter(obj -> obj.getOrderId().indexOf(startWith) >= 0).distinct().sorted(byNonce).collect(Collectors.toList());
         return result;
     }
