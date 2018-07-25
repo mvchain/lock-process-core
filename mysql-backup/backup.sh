@@ -26,4 +26,5 @@ vi /root/.ssh/authorized_keys
 # on backup server
 mkdir -p /opt/mysql-backup/lock-process
 
-# 5.Java development to make app server to send binlog files to backup server daily.
+# 5.Crontab.
+scp /var/lib/mysql/mysql-bin.* root@[ip]:/opt/mysql-backup/lock-process/test/
